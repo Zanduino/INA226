@@ -1,6 +1,8 @@
 /*******************************************************************************************************************
 ** INA class method definitions.                                                                                  **
 **                                                                                                                **
+** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
+**                                                                                                                **
 ** This program is free software: you can redistribute it and/or modify it under the terms of the GNU General     **
 ** Public License as published by the Free Software Foundation, either version 3 of the License, or (at your      **
 ** option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY     **
@@ -9,7 +11,7 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.                                          **
 **                                                                                                                **
 *******************************************************************************************************************/
-#include "INA.h"                                                              // Include the header definition    //
+#include "INA226.h"                                                           // Include the header definition    //
 #include <Wire.h>                                                             // I2C Library definition           //
 
 /*******************************************************************************************************************
@@ -24,10 +26,7 @@ INA226_Class::~INA226_Class() {} // of unused class destructor                //
 /*******************************************************************************************************************
 ** Method begin() does all of the initialization work                                                             **
 *******************************************************************************************************************/
-void INA226_Class::begin(uint8_t  maxBusVolts =   30,                         // Class initializer with optional  //
-                         uint8_t  maxBusAmps  =  200,                         // register settings for setup and  //
-                         uint16_t maxShuntmV  =   50,                         // calibration                      //
-                         uint32_t microOhmR   = UINT32_MAX ) {                //                                  //
+void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR) { // Class initializer                //
   Wire.begin();                                                               // Start the I2C wire subsystem     //
   for(_DeviceAddress = 1;_DeviceAddress<127;_DeviceAddress++) {               // Loop for each possible address   //
     Wire.beginTransmission(_DeviceAddress);                                   // See if something is at address   //
@@ -35,9 +34,8 @@ void INA226_Class::begin(uint8_t  maxBusVolts =   30,                         //
       writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
       delay(10);                                                              // Wait for INA to finish resetting //
       if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        if (microOhmR==UINT32_MAX) microOhmR = (maxShuntmV*1000)/maxBusAmps;  // convert to avoid floating point  //
         _Current_LSB = (uint32_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB        //
-        _Calibration = 51200000/((int64_t)_Current_LSB*microOhmR/100000);     // Compute calibration register     //
+        _Calibration = 51200000/((int64_t)_Current_LSB*nanoOhmR/100000);      // Compute calibration register     //
         _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
         writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
         break;                                                                // Stop searching                   //
@@ -107,14 +105,14 @@ uint16_t INA226_Class::getBusMilliVolts() {                                   //
 /*******************************************************************************************************************
 ** Method getShuntMicroVolts retrieves the shunt voltage measurement                                              **
 *******************************************************************************************************************/
-int32_t INA226_Class::getShuntMicroVolts() {                                  //                                  //
-  int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
+int16_t INA226_Class::getShuntMicroVolts() {                                  //                                  //
+  int16_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
   return(shuntVoltage);                                                       // return computed microvolts       //
 } // of method getShuntMicroVolts()                                           //                                  //
 
 /*******************************************************************************************************************
-** Method getBusMicroAmps retrieves the computed current in microamps                                             **
+** Method getBusMicroAmps retrieves the computed current in microamps.                                            **
 *******************************************************************************************************************/
 int32_t INA226_Class::getBusMicroAmps() {                                     //                                  //
   int32_t microAmps = readWord(INA_CURRENT_REGISTER);                         // Get the raw value                //
@@ -129,7 +127,7 @@ int32_t INA226_Class::getBusMicroWatts() {                                    //
   int32_t microWatts = readWord(INA_POWER_REGISTER);                          // Get the raw value                //
   microWatts = (int64_t)microWatts*_Power_LSB/1000;                           // Convert to milliwatts            //
   return(microWatts);                                                         // return computed milliwatts       //
-} // of method getBusMicroWatts()                                              //                                  //
+} // of method getBusMicroWatts()                                             //                                  //
 
 /*******************************************************************************************************************
 ** Method setAveraging sets the hardware averaging for the different devices                                      **

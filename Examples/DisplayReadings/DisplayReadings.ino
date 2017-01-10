@@ -27,7 +27,7 @@
 ** 1.0.0   2017-01-09 Arnd@SV-Zanshin.Com Cloned example from test program suite                                  **
 **                                                                                                                **
 *******************************************************************************************************************/
-#include <INA.h>                                                              // INA Library                      //
+#include <INA226.h>                                                           // INA226 Library                   //
 /*******************************************************************************************************************
 ** Declare program Constants                                                                                      **
 *******************************************************************************************************************/
@@ -53,10 +53,8 @@ void setup() {                                                                //
   Serial.begin(SERIAL_SPEED);                                                 // Start serial communications      //
   delay(2000);                                                                // Wait for comms port to connect   //
   Serial.print(F("\n\nDisplay INA226 Readings V1.0.0\n"));                    // Display program information      //
-  INA226.begin(     6,                                                        // Volts maximum expected on bus    //
-                    1,                                                        // ± Amps maximum expected on bus   //
-                  100,                                                        // ± Shunt millivolts maximum       //
-               100000);                                                       // Shunt resistance in microOhm(µ?),//
+  INA226.begin(     1,                                                        // ± Amps maximum expected on bus   //
+               100000);                                                       // Shunt resistance in nanoOhm(µ?),//
                                                                               // "100000" equates to 0.1 Ohm      //
   INA226.setAveraging(4);                                                     // Average each reading n-times     //
   INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //

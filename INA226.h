@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer           Comments                                                                 **
 ** ====== ========== =================== ======================================================================== **
+** 1.0.0  2017-01-10 Arnd@SV-Zanshin.Com Fixed library file name, added constants for setMode() call              **
 ** 1.0.0  2017-01-09 Arnd@SV-Zanshin.Com Added reset() and setMode() calls                                        **
 ** 1.0.b2 2017-01-08 Arnd@SV-Zanshin.Com Removed INA219 code, concentrating on only the INA226                    **
 ** 1.0.b1 2017-01-05 Arnd@SV-Zanshin.Com Created class                                                            **
@@ -44,14 +45,14 @@
   /*****************************************************************************************************************
   ** Declare constants used in the class                                                                          **
   *****************************************************************************************************************/
-  const uint8_t  I2C_DELAY                     =    10;                       // Microsecond delay on write       //
-  const uint8_t  INA_CONFIGURATION_REGISTER    =     0;                       // Registers common to all INAs     //
-  const uint8_t  INA_SHUNT_VOLTAGE_REGISTER    =     1;                       //                                  //
-  const uint8_t  INA_BUS_VOLTAGE_REGISTER      =     2;                       //                                  //
-  const uint8_t  INA_POWER_REGISTER            =     3;                       //                                  //
-  const uint8_t  INA_CURRENT_REGISTER          =     4;                       //                                  //
-  const uint8_t  INA_CALIBRATION_REGISTER      =     5;                       //                                  //
-  const uint8_t  INA_MASK_ENABLE_REGISTER      =     6;                       //                                  //
+  const uint8_t  I2C_DELAY                    =     10;                       // Microsecond delay on write       //
+  const uint8_t  INA_CONFIGURATION_REGISTER   =      0;                       // Registers common to all INAs     //
+  const uint8_t  INA_SHUNT_VOLTAGE_REGISTER   =      1;                       //                                  //
+  const uint8_t  INA_BUS_VOLTAGE_REGISTER     =      2;                       //                                  //
+  const uint8_t  INA_POWER_REGISTER           =      3;                       //                                  //
+  const uint8_t  INA_CURRENT_REGISTER         =      4;                       //                                  //
+  const uint8_t  INA_CALIBRATION_REGISTER     =      5;                       //                                  //
+  const uint8_t  INA_MASK_ENABLE_REGISTER     =      6;                       //                                  //
   const uint16_t INA_RESET_DEVICE             = 0x8000;                       // Write to configuration to reset  //
   const uint16_t INA_DEFAULT_CONFIGURATION    = 0x4127;                       // Default configuration register   //
   const uint16_t INA_BUS_VOLTAGE_LSB          =    125;                       // LSB in uV *100 1.25mV            //
@@ -61,6 +62,13 @@
   const uint16_t INA_CONFIG_SHUNT_TIME_MASK   = 0x0038;                       // Bits 3-5                         //
   const uint16_t INA_CONVERSION_READY_MASK    = 0x0080;                       // Bit 4                            //
   const uint16_t INA_CONFIG_MODE_MASK         = 0x0007;                       // Bits 0-3                         //
+  const uint8_t  INA_MODE_TRIGGERED_SHUNT     =   B001;                       // Triggered shunt, no bus          //
+  const uint8_t  INA_MODE_TRIGGERED_BUS       =   B010;                       // Triggered bus, no shunt          //
+  const uint8_t  INA_MODE_TRIGGERED_BOTH      =   B011;                       // Triggered bus and shunt          //
+  const uint8_t  INA_MODE_POWER_DOWN          =   B100;                       // shutdown or power-down           //
+  const uint8_t  INA_MODE_CONTINUOUS_SHUNT    =   B101;                       // Continuous shunt, no bus         //
+  const uint8_t  INA_MODE_CONTINUOUS_BUS      =   B110;                       // Continuous bus, no shunt         //
+  const uint8_t  INA_MODE_CONTINUOUS_BOTH     =   B111;                       // Both continuous, default value   //
 
   /*****************************************************************************************************************
   ** Declare class header                                                                                         **
@@ -69,12 +77,9 @@
     public:                                                                   // Publicly visible methods         //
       INA226_Class();                                                         // Class constructor                //
       ~INA226_Class();                                                        // Class destructor                 //
-      void     begin(uint8_t  maxBusVolts =  30,                              // Initialize class                 //
-                     uint8_t  maxBusAmps  = 200,                              // register settings for setup and  //
-                     uint16_t maxShuntmV  =  50,                              // calibration                      //
-                     uint32_t microOhmR   = UINT32_MAX );                     //                                  //
+      void     begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR);      // Class initializer                //
       uint16_t getBusMilliVolts();                                            // Retrieve Bus voltage in mV       //
-      int32_t  getShuntMicroVolts();                                          // Retrieve Shunt voltage in uV     //
+      int16_t  getShuntMicroVolts();                                          // Retrieve Shunt voltage in uV     //
       int32_t  getBusMicroAmps();                                             // Retrieve microamps               //
       int32_t  getBusMicroWatts();                                            // Retrieve microwatts              //
       void     reset();                                                       // Reset the device                 //
