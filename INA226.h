@@ -78,8 +78,8 @@
       INA226_Class();                                                         // Class constructor                //
       ~INA226_Class();                                                        // Class destructor                 //
       void     begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR);      // Class initializer                //
-      uint16_t getBusMilliVolts();                                            // Retrieve Bus voltage in mV       //
-      int16_t  getShuntMicroVolts();                                          // Retrieve Shunt voltage in uV     //
+      uint16_t getBusMilliVolts(const bool waitSwitch=false);                 // Retrieve Bus voltage in mV       //
+      int16_t  getShuntMicroVolts(const bool waitSwitch=false);               // Retrieve Shunt voltage in uV     //
       int32_t  getBusMicroAmps();                                             // Retrieve microamps               //
       int32_t  getBusMicroWatts();                                            // Retrieve microwatts              //
       void     reset();                                                       // Reset the device                 //
@@ -100,5 +100,6 @@
       uint16_t _Configuration      = 0;                                       // Configuration register value     //
       uint16_t _Current_LSB        = 0;                                       // Amperage LSB                     //
       uint32_t _Power_LSB          = 0;                                       // Wattage LSB                      //
+      uint8_t  _OperatingMode      = B111;                                    // Default continuous mode operation//
   }; // of MicrochipSRAM class definition                                     //                                  //
 #endif                                                                        //----------------------------------//

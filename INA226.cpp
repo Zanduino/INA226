@@ -44,7 +44,6 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR) { //
   } // for-next each possible I2C address                                     //                                  //
 } // of method begin()                                                        //----------------------------------//
 
-
 /*******************************************************************************************************************
 ** Method readByte reads 1 byte from the specified address                                                        **
 *******************************************************************************************************************/
@@ -96,18 +95,28 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //
 /*******************************************************************************************************************
 ** Method getBusMilliVolts retrieves the bus voltage measurement                                                  **
 *******************************************************************************************************************/
-uint16_t INA226_Class::getBusMilliVolts() {                                   //                                  //
+uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch=false) {        //                                  //
+  if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER);                   // Get the raw value and apply      //
-  busVoltage = busVoltage*INA_BUS_VOLTAGE_LSB/100;                            // conversion to get milliVolts     //
+  busVoltage = (uint32_t)busVoltage*INA_BUS_VOLTAGE_LSB/100;                  // conversion to get milliVolts     //
+  if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,1)) {              // If triggered mode and bus active //
+    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
+    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //    
+  } // of if-then triggered mode enabled                                      //                                  //
   return(busVoltage);                                                         // return computed milliVolts       //
 } // of method getBusMilliVolts()                                             //                                  //
 
 /*******************************************************************************************************************
 ** Method getShuntMicroVolts retrieves the shunt voltage measurement                                              **
 *******************************************************************************************************************/
-int16_t INA226_Class::getShuntMicroVolts() {                                  //                                  //
+int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch=false) {       //                                  //
+  if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   int16_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
+  if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,0)) {              // If triggered and shunt active    //
+    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
+    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //
+  } // of if-then triggered mode enabled                                      //                                  //
   return(shuntVoltage);                                                       // return computed microvolts       //
 } // of method getShuntMicroVolts()                                           //                                  //
 
@@ -206,7 +215,8 @@ void INA226_Class::reset() {                                                  //
 void INA226_Class::setMode(uint8_t mode = 7) {                                // Set the monitoring mode          //
   int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
   configRegister &= ~INA_CONFIG_MODE_MASK;                                    // zero out the mode bits           //
-  mode = B00001111 | mode;                                                    // Mask off unused bits             //
+  mode = B00001111 & mode;                                                    // Mask off unused bits             //
   configRegister |= mode;                                                     // shift in the mode settings       //
   writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
+  _OperatingMode = mode;                                                      // Save the operating mode          //
 } // of method setMode()                                                      //                                  //

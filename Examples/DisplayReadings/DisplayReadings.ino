@@ -54,12 +54,15 @@ void setup() {                                                                //
   delay(2000);                                                                // Wait for comms port to connect   //
   Serial.print(F("\n\nDisplay INA226 Readings V1.0.0\n"));                    // Display program information      //
   INA226.begin(     1,                                                        // ± Amps maximum expected on bus   //
-               100000);                                                       // Shunt resistance in nanoOhm(µ?),//
+               100000);                                                       // Shunt resistance in nanoOhm,     //
                                                                               // "100000" equates to 0.1 Ohm      //
   INA226.setAveraging(4);                                                     // Average each reading n-times     //
   INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
   INA226.setShuntConversion();                                                // Maximum conversion time 8.244ms  //
-  INA226.setMode(7);                                                          // Bus/shunt measured continuously  //
+  
+  INA226.setMode(INA_MODE_TRIGGERED_BOTH);
+  
+//  INA226.setMode(7);                                                          // Bus/shunt measured continuously  //
 } // of method setup()                                                        //                                  //
 /*******************************************************************************************************************
 ** This is the main program for the Arduino IDE, it is called in an infinite loop. The INA226 measurements are    **
