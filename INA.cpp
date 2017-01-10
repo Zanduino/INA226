@@ -98,10 +98,10 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //
 /*******************************************************************************************************************
 ** Method getBusMilliVolts retrieves the bus voltage measurement                                                  **
 *******************************************************************************************************************/
-uint32_t INA226_Class::getBusMilliVolts() {                                   //                                  //
-  uint32_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER);                   // Get the raw value                //
-  busVoltage = busVoltage*INA_BUS_VOLTAGE_LSB/100;                            // Convert to millivolts            //
-  return(busVoltage);                                                         // return computed millivolts       //
+uint16_t INA226_Class::getBusMilliVolts() {                                   //                                  //
+  uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER);                   // Get the raw value and apply      //
+  busVoltage = busVoltage*INA_BUS_VOLTAGE_LSB/100;                            // conversion to get milliVolts     //
+  return(busVoltage);                                                         // return computed milliVolts       //
 } // of method getBusMilliVolts()                                             //                                  //
 
 /*******************************************************************************************************************

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "DisplayReadings", "DisplayReadings.cppproj", "{D9CB478C-F802-4499-9278-5D54C321A635}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9CB478C-F802-4499-9278-5D54C321A635}.Debug|AVR.ActiveCfg = Debug|AVR
+		{D9CB478C-F802-4499-9278-5D54C321A635}.Debug|AVR.Build.0 = Debug|AVR
+		{D9CB478C-F802-4499-9278-5D54C321A635}.Release|AVR.ActiveCfg = Release|AVR
+		{D9CB478C-F802-4499-9278-5D54C321A635}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
