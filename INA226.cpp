@@ -13,7 +13,6 @@
 *******************************************************************************************************************/
 #include "INA226.h"                                                           // Include the header definition    //
 #include <Wire.h>                                                             // I2C Library definition           //
-
 /*******************************************************************************************************************
 ** Class Constructor instantiates the class but otherwise does nothing, that is performed in "begin"              **
 *******************************************************************************************************************/
@@ -22,7 +21,6 @@ INA226_Class::INA226_Class() {}                                               //
 ** Class Destructor currently does nothing and is included for compatibility purposes                             **
 *******************************************************************************************************************/
 INA226_Class::~INA226_Class() {} // of unused class destructor                //                                  //
-
 /*******************************************************************************************************************
 ** Method begin() does all of the initialization work                                                             **
 *******************************************************************************************************************/
@@ -42,8 +40,7 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR) { //
       } // of if-then we've found an INA226                                   //                                  //
     } // of if-then we have found a live device                               //                                  //
   } // for-next each possible I2C address                                     //                                  //
-} // of method begin()                                                        //----------------------------------//
-
+} // of method begin()                                                        //                                  //
 /*******************************************************************************************************************
 ** Method readByte reads 1 byte from the specified address                                                        **
 *******************************************************************************************************************/
@@ -91,7 +88,6 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //
   Wire.write((uint8_t)data);                                                  // and then the second              //
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
 } // of method writeWord()                                                    //                                  //
-
 /*******************************************************************************************************************
 ** Method getBusMilliVolts retrieves the bus voltage measurement                                                  **
 *******************************************************************************************************************/
@@ -101,11 +97,10 @@ uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch=false) {        //
   busVoltage = (uint32_t)busVoltage*INA_BUS_VOLTAGE_LSB/100;                  // conversion to get milliVolts     //
   if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,1)) {              // If triggered mode and bus active //
     int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
-    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //    
+    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //
   } // of if-then triggered mode enabled                                      //                                  //
   return(busVoltage);                                                         // return computed milliVolts       //
 } // of method getBusMilliVolts()                                             //                                  //
-
 /*******************************************************************************************************************
 ** Method getShuntMicroVolts retrieves the shunt voltage measurement                                              **
 *******************************************************************************************************************/
@@ -119,7 +114,6 @@ int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch=false) {       //
   } // of if-then triggered mode enabled                                      //                                  //
   return(shuntVoltage);                                                       // return computed microvolts       //
 } // of method getShuntMicroVolts()                                           //                                  //
-
 /*******************************************************************************************************************
 ** Method getBusMicroAmps retrieves the computed current in microamps.                                            **
 *******************************************************************************************************************/
@@ -128,7 +122,6 @@ int32_t INA226_Class::getBusMicroAmps() {                                     //
   microAmps = (int64_t)microAmps*_Current_LSB/1000;                           // Convert to microamps             //
   return(microAmps);                                                          // return computed microamps        //
 } // of method getBusMicroAmps()                                              //                                  //
-
 /*******************************************************************************************************************
 ** Method getBusMicroWatts retrieves the computed power in milliwatts                                             **
 *******************************************************************************************************************/
@@ -137,7 +130,6 @@ int32_t INA226_Class::getBusMicroWatts() {                                    //
   microWatts = (int64_t)microWatts*_Power_LSB/1000;                           // Convert to milliwatts            //
   return(microWatts);                                                         // return computed milliwatts       //
 } // of method getBusMicroWatts()                                             //                                  //
-
 /*******************************************************************************************************************
 ** Method setAveraging sets the hardware averaging for the different devices                                      **
 *******************************************************************************************************************/
@@ -156,7 +148,6 @@ void INA226_Class::setAveraging(const uint16_t averages = UINT16_MAX) {       //
   configRegister |= (uint16_t)averageIndex << 9;                              // shift in the averages to register//
   writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
 } // of method setAveraging()                                                 //                                  //
-
 /*******************************************************************************************************************
 ** Method setBusConversion specifies the conversion rate (see datasheet for 8 distinct values) for the bus        **
 *******************************************************************************************************************/
@@ -167,7 +158,6 @@ void INA226_Class::setBusConversion(uint8_t convTime = UINT8_MAX) {           //
   configRegister |= (uint16_t)convTime << 6;                                  // shift in the averages to register//
   writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
 } // of method setBusConversion()                                             //                                  //
-
 /*******************************************************************************************************************
 ** Method setShuntConversion specifies the conversion rate (see datasheet for 8 distinct values) for the shunt    **
 *******************************************************************************************************************/
@@ -178,7 +168,6 @@ void INA226_Class::setShuntConversion(uint8_t convTime = UINT8_MAX) {         //
   configRegister |= (uint16_t)convTime << 3;                                  // shift in the averages to register//
   writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
 } // of method setShuntConversion()                                           //                                  //
-
 /*******************************************************************************************************************
 ** Method waitForConversion loops until the current conversion is marked as finished. If the conversion has       **
 ** completed already then the flag (and interrupt pin, if activated) is also reset.                               **
@@ -189,7 +178,6 @@ void INA226_Class::waitForConversion() {                                      //
     conversionBits = readWord(INA_MASK_ENABLE_REGISTER)&(uint16_t)8;          //                                  //
   } // of while the conversion hasn't finished                                //                                  //
 } // of method waitForConversion()                                            //                                  //
-
 /*******************************************************************************************************************
 ** Method setAlertPinOnConversion configure the INA226 to pull the ALERT pin low when a conversion is complete    **
 *******************************************************************************************************************/
@@ -199,7 +187,6 @@ void INA226_Class::setAlertPinOnConversion(const bool alertState) {           //
               else alertRegister |= (uint16_t)(1<<10);                        // turn on the alert bit            //
   writeWord(INA_MASK_ENABLE_REGISTER,alertRegister);                          // Write register back to device    //
 } // of method setAlertPinOnConversion                                        //                                  //
-
 /*******************************************************************************************************************
 ** Method reset resets the INA226 using the first bit in the configuration register                               **
 *******************************************************************************************************************/
@@ -207,7 +194,6 @@ void INA226_Class::reset() {                                                  //
   writeWord(INA_CONFIGURATION_REGISTER,0x8000);                               // Set most significant bit         //
   delay(I2C_DELAY);                                                           // Let the INA226 reboot            //
 } // of method reset                                                          //                                  //
-
 /*******************************************************************************************************************
 ** Method setMode allows the various mode combinations to be set. If no parameter is given the system goes back   **
 ** to the default startup mode.                                                                                   **

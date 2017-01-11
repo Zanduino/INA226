@@ -2,11 +2,15 @@
 ** Program to demonstrate the INA226 library for the Arduino IDE. A simple infinite loop of measurments will      **
 ** display the bus voltage and current running through the INA226.                                                **
 **                                                                                                                **
+**                                                                                                                **
+** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
+**                                                                                                                **
 ** This example is for a INA226 set up to measure a 5-Volt load with a 0.1 Ohm resistor in place, this is the same**
 ** setup that can be found in the Adafruit INA219 breakout board.  The complex calibration options are done at    **
-** runtime using the 4 parameters specified in the "begin()" call and the library has gone to great lengths to    **
-** avoid the use of floating point and this program's floating point use is just for easy display purposes; the   **
-** results come back as signed 32-bit integers and can cover the whole range of expected currents and voltages.   **
+** runtime using the 2 parameters specified in the "begin()" call and the library has gone to great lengths to    **
+** avoid the use of floating point to conserve space and minimize runtime.  This demo program uses floating point **
+** only to convert and display the data conveniently. The INA226 uses 15 bits of precision, and even though the   **
+** current and watt information is returned using 32-bit integers the precision remains the same.                 **
 **                                                                                                                **
 ** The datasheet for the INA226 can be found at http://www.ti.com/lit/ds/symlink/ina226.pdf and it contains the   **
 ** information required in order to hook up the device. Unfortunately it comes as a VSSOP package but it can be   **
@@ -24,6 +28,7 @@
 **                                                                                                                **
 ** Vers.   Date       Developer           Comments                                                                **
 ** ======= ========== =================== ======================================================================= **
+** 1.0.1   2017-01-12 Arnd@SV-Zanshin.Com Minor code cleanup and added more comments                              **
 ** 1.0.0   2017-01-09 Arnd@SV-Zanshin.Com Cloned example from test program suite                                  **
 **                                                                                                                **
 *******************************************************************************************************************/
@@ -36,7 +41,7 @@ const uint32_t SERIAL_SPEED          = 115200;                                //
 /*******************************************************************************************************************
 ** Declare global variables and instantiate classes                                                               **
 *******************************************************************************************************************/
-INA226_Class      INA226;                                                     // INA class instantiation          //
+INA226_Class INA226;                                                          // INA class instantiation          //
 /*******************************************************************************************************************
 ** Declare prototypes for all functions used                                                                      **
 *******************************************************************************************************************/
@@ -52,17 +57,13 @@ void setup() {                                                                //
   digitalWrite(GREEN_LED_PIN,true);                                           // Turn on the LED                  //
   Serial.begin(SERIAL_SPEED);                                                 // Start serial communications      //
   delay(2000);                                                                // Wait for comms port to connect   //
-  Serial.print(F("\n\nDisplay INA226 Readings V1.0.0\n"));                    // Display program information      //
-  INA226.begin(     1,                                                        // ± Amps maximum expected on bus   //
-               100000);                                                       // Shunt resistance in nanoOhm,     //
-                                                                              // "100000" equates to 0.1 Ohm      //
+  Serial.print(F("\n\nDisplay INA226 Readings V1.0.1\n"));                    // Display program information      //
+  // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor      //
+  INA226.begin(1,100000);                                                     //                                  //
   INA226.setAveraging(4);                                                     // Average each reading n-times     //
   INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
   INA226.setShuntConversion();                                                // Maximum conversion time 8.244ms  //
-  
-  INA226.setMode(INA_MODE_TRIGGERED_BOTH);
-  
-//  INA226.setMode(7);                                                          // Bus/shunt measured continuously  //
+  INA226.setMode(INA_MODE_CONTINUOUS_BOTH);                                   // Bus/shunt measured continuously  //
 } // of method setup()                                                        //                                  //
 /*******************************************************************************************************************
 ** This is the main program for the Arduino IDE, it is called in an infinite loop. The INA226 measurements are    **
