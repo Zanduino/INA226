@@ -12,4 +12,4 @@ Great lengths have been gone to avoid the use of floating point in the library. 
 
 The INA226 has a dedicated interrupt pin which can be used to trigger pin-change interrupts on the Arduino and the examples show a program that measures readings using this output pin so that the Arduino can perform other concurrent tasks while still retrieving measurements.
 
-![Zanshin Logo](https://www.sv-zanshin.com/r/images/gif/zanshinkanjitiny.gif) <img src="https://www.sv-zanshin.com/r/images/gif/zanshintext.gif" width="75"/>
+![Zanshin Logo](https://www.sv-zanshin.com/r/images/site/gif/zanshinkanjitiny.gif) <img src="https://www.sv-zanshin.com/r/images/site/gif/zanshintext.gif" width="75"/>
