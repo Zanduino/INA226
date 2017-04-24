@@ -23,3 +23,5 @@ Examples/*.ino linguist-documentation=false
 Examples/BackgroundRead/BackgroundRead.ino linguist-documentation=false
 INA226/Examples/* linguist-documentation=false
 SV-Zanshin/INA226/Examples/* linguist-documentation=false
+
+Examples/* linguist-vendored=false
