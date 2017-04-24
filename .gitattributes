@@ -15,3 +15,7 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Don't skip Examples directory for file detection
+Examples/* linguist-documentation=false
+Examples/**.ino linguist-documentation=false
