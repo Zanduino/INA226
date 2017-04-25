@@ -45,3 +45,11 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Files and directories from the Atmel Studio Arduino IDE
+.vs
+__vm
+Debug
+*.atsln
+*.componentinfo.xml
+*.cppproj
