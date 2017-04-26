@@ -33,8 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer           Comments                                                                 **
 ** ====== ========== =================== ======================================================================== **
-** 1.0.1  2017-05-26 Arnd@SV-Zanshin.Com Changed _CurrentLSB from uint16_t to uint32_t due to overflow bug,       **
-**                                       corrected begin() parameter name from nanoOhm to milliOhm                **
+** 1.0.1  2017-05-26 Arnd@SV-Zanshin.Com Changed _CurrentLSB from uint16_t to uint32_t due to overflow bug        **
 ** 1.0.0  2017-01-10 Arnd@SV-Zanshin.Com Fixed library file name, added constants for setMode() call              **
 ** 1.0.0  2017-01-09 Arnd@SV-Zanshin.Com Added reset() and setMode() calls                                        **
 ** 1.0.b2 2017-01-08 Arnd@SV-Zanshin.Com Removed INA219 code, concentrating on only the INA226                    **
@@ -79,7 +78,7 @@
     public:                                                                   // Publicly visible methods         //
       INA226_Class();                                                         // Class constructor                //
       ~INA226_Class();                                                        // Class destructor                 //
-      void     begin(const uint8_t maxBusAmps, const uint32_t milliOhmR);      // Class initializer                //
+      void     begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR);      // Class initializer                //
       uint16_t getBusMilliVolts(const bool waitSwitch=false);                 // Retrieve Bus voltage in mV       //
       int16_t  getShuntMicroVolts(const bool waitSwitch=false);               // Retrieve Shunt voltage in uV     //
       int32_t  getBusMicroAmps();                                             // Retrieve microamps               //
