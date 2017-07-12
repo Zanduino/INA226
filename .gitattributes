@@ -1,9 +1,14 @@
-# added lines so that the library is detected as an Arduino one rather than straight c++ code
+##########################################################################################
+# This section defines which file types are associated with which linguist-documentation #
+# language types. Without this, linguist detects this as mere c++ code and not as an     #
+# Arduino library                                                                        #
+##########################################################################################
 examples/ linguist-documentation=false
 *.ino linguist-language=Arduino
 *.c linguist-language=Arduino
 *.cpp linguist-language=Arduino
 *.h linguist-language=Arduino
+
 # Auto detect text files and perform LF normalization
 * text=auto
 
@@ -21,13 +26,3 @@ examples/ linguist-documentation=false
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
-
-# Don't skip Examples directory for file detection
-* linguist-documentation=false
-Examples/* linguist-documentation=false
-Examples/*.ino linguist-documentation=false
-Examples/BackgroundRead/BackgroundRead.ino linguist-documentation=false
-INA226/Examples/* linguist-documentation=false
-SV-Zanshin/INA226/Examples/* linguist-documentation=false
-
-Examples/* linguist-vendored=false
