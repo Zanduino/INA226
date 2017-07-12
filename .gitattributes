@@ -1,3 +1,9 @@
+# added lines so that the library is detected as an Arduino one rather than straight c++ code
+examples/ linguist-documentation=false
+*.ino linguist-language=Arduino
+*.c linguist-language=Arduino
+*.cpp linguist-language=Arduino
+*.h linguist-language=Arduino
 # Auto detect text files and perform LF normalization
 * text=auto
 
