@@ -2,11 +2,10 @@
 ** Program to demonstrate the INA226 library for the Arduino IDE. A simple infinite loop of measurements will     **
 ** display the bus voltage and current running through the INA226.                                                **
 **                                                                                                                **
-**                                                                                                                **
 ** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
 **                                                                                                                **
 ** This example is for a INA226 set up to measure the output of a Genasun MPPT controller for a 24-Volt boat. The **
-** shunt installed is a 75mW @ 10A unit, which means that it has a resistance of .75Ohm                           **
+** shunt installed is a 75mV @ 10A unit, which means that it has a resistance of .75Ohm                           **
 ** The complex calibration options are done at runtime using the 2 parameters specified in the "begin()" call and **
 ** the library has gone to lengths to avoid the use of floating point to conserve space and minimize runtime.     **
 ** This demo program uses floating point only to convert and display the data conveniently. The INA226 uses 15    **
@@ -29,6 +28,7 @@
 **                                                                                                                **
 ** Vers.   Date       Developer           Comments                                                                **
 ** ======= ========== =================== ======================================================================= **
+** 1.0.1   2017-04-28 Arnd@SV-Zanshin.Com Corrected comments                                                      **
 ** 1.0.0   2017-04-26 Arnd@SV-Zanshin.Com Cloned example from test program suite                                  **
 **                                                                                                                **
 *******************************************************************************************************************/
