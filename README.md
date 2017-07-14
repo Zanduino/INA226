@@ -1,5 +1,5 @@
 # INA226
-<img src="http://www.ti.com/graphics/folders/partimages/INA226.jpg" width="175" align="right"/>INA226 High-Side/Low-Side Bi-Directional I2C Current and Power Monitor library for the _Arduino_.  Texas Instruments produces this family of power monitors and the series is described at on their product page at [INA226](http://www.ti.com/product/INA226).
+<img src="https://github.com/SV-Zanshin/INA226/blob/master/Images/INA226.jpg" width="175" align="right"/>INA226 High-Side/Low-Side Bi-Directional I2C Current and Power Monitor library for the _Arduino_.  Texas Instruments produces this family of power monitors and the series is described at on their product page at [INA226](http://www.ti.com/product/INA226).
 ## INA219 vs INA226
 Several breakout boards, tutorials and libraries exist for the INA219, which is the "little brother" to this INA226 chip. While the pin 
 layout is similar, with the INA219 having 8 pins and the INA226 having 2 more pins, the internal configuration settings and registers are 
