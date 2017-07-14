@@ -1,0 +1,30 @@
+﻿###################################
+# Syntax Coloring Map for library #
+###################################
+
+################################
+# Classes/Datatypes (KEYWORD1) #
+################################
+INA226_Class	KEYWORD1
+
+####################################
+# Methods and Functions (KEYWORD2) #
+####################################
+begin					KEYWORD2
+getBusMilliVolts
+getShuntMicroVolts
+getBusMicroAmps
+getBussMicroWatts
+reset
+setMode
+setAveraging
+setBusConversion
+setShuntConversion
+setAlertPinOnConversion
+waitForConversion
+
+########################
+# Constants (LITERAL1) #
+########################
+
+
