@@ -1,19 +1,19 @@
-/*******************************************************************************************************************
+﻿/*******************************************************************************************************************
 ** Program to demonstrate using the interrupt pin of the INA226, a pin-change interrupt handler and the INA226    **
 ** to read voltage and current information in the background while allowing the main Arduino code to continue     **
 ** processing normally until it is ready to consume the readings.                                                 **
 **                                                                                                                **
 ** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
 **                                                                                                                **
-** This example is for a INA226 set up to measure a 5-Volt load with a 0.1 Ohm resistor in place, this is the same**
+** This example is for a INA226 set up to measure a 5-Volt load with a 0.1Ω resistor in place, this is the same   **
 ** setup that can be found in the Adafruit INA219 breakout board.  The complex calibration options are done at    **
 ** runtime using the 2 parameters specified in the "begin()" call and the library has gone to great lengths to    **
 ** avoid the use of floating point to conserve space and minimize runtime.  This demo program uses floating point **
 ** only to convert and display the data conveniently. The INA226 uses 15 bits of precision, and even though the   **
 ** current and watt information is returned using 32-bit integers the precision remains the same.                 **
 **                                                                                                                **
-** The INA226 is set up to measure using the maximum conversion length (and the maximum accuracy) and then average**
-** those readings 64 times. This results in readings taking 8.244ms times 64 = 527.616ms or just less than 2 times**
+** The INA226 is set up to measure using the maximum conversion length (and maximum accuracy) and then average    **
+** those readings 64 times. This results in readings taking 8.244ms x 64 = 527.616ms or just less than 2 times    **
 ** a second. The pin-change interrupt handler is called when a reading is finished and the INA226 pulls the pin   **
 ** down to ground, it resets the pin status and adds the readings to the global variables. The main program will  **
 ** do whatever processing it has to and every 5 seconds it will display the current averaged readings and reset   **
@@ -38,6 +38,7 @@
 **                                                                                                                **
 ** Vers.   Date       Developer           Comments                                                                **
 ** ======= ========== =================== ======================================================================= **
+** 1.0.1   2017-07-15 Arnd@SV-Zanshin.Com Cleaded up comments                                                     **
 ** 1.0.0   2017-01-12 Arnd@SV-Zanshin.Com Created example                                                         **
 **                                                                                                                **
 *******************************************************************************************************************/
@@ -45,16 +46,16 @@
 /*******************************************************************************************************************
 ** Declare program Constants                                                                                      **
 *******************************************************************************************************************/
-const uint8_t  INA226_ALERT_PIN =      8;                                     // Pin 8. Micro only allows SS,SCK, //
-const uint8_t  GREEN_LED_PIN    =     13;                                     // Green LED (nonstandard location) //
-const uint32_t SERIAL_SPEED     = 115200;                                     // Use fast serial speed            //
+const uint8_t  INA226_ALERT_PIN   =      8;                                   // Pin 8. Micro only allows SS,SCK, //
+const uint8_t  GREEN_LED_PIN      =     13;                                   // Green LED (nonstandard location) //
+const uint32_t SERIAL_SPEED       = 115200;                                   // Use fast serial speed            //
 /*******************************************************************************************************************
 ** Declare global variables and instantiate classes                                                               **
 *******************************************************************************************************************/
 INA226_Class INA226;                                                          // INA class instantiation          //
-volatile uint64_t sumBusMillVolts = 0;                                        // Sum of bus voltage readings      //
-volatile int64_t  sumBusMicroAmps = 0;                                        // Sum of bus amperage readings     //
-volatile uint8_t  readings        = 0;                                        // Number of measurements taken     //
+volatile uint64_t sumBusMillVolts =      0;                                   // Sum of bus voltage readings      //
+volatile int64_t  sumBusMicroAmps =      0;                                   // Sum of bus amperage readings     //
+volatile uint8_t  readings        =      0;                                   // Number of measurements taken     //
 /*******************************************************************************************************************
 ** Declare interrupt service routine for the pin-change interrupt on pin 8 which is set in the setup() method     **
 *******************************************************************************************************************/
@@ -92,7 +93,7 @@ void setup() {                                                                //
   Serial.begin(SERIAL_SPEED);                                                 // Start serial communications      //
   delay(2000);                                                                // Wait for comms port to connect   //
   Serial.print(F("\n\nBackground INA226 Read V1.0.0\n"));                     // Display program information      //
-  // The begin initialized the calibration for an expected �1 Amps maximum current and for a 0.1Ohm resistor      //
+  // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ω resistor        //
   INA226.begin(1,100000);                                                     //                                  //
   INA226.setAveraging(64);                                                    // Average each reading n-times     //
   INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
@@ -108,13 +109,13 @@ void loop() {                                                                 //
   static long lastMillis = millis();                                          // Store the last time we printed   //
 
 
-  /*
-    Do normal processing here
-  */
+                               /****************************************
+                               ** Perform the program processing here **
+                               ****************************************/
 
 
   /*****************************************************************************************************************
-  ** Occasionally check to see if we have collected 10 or more readings over time, and display the time and       **
+  ** Check to see if we have collected 10 or more readings each main loop iteration, and display the time and     **
   ** average information before resetting the values. Interrupts are turned off when resetting the values to      **
   ** ensure atomic operations                                                                                     **
   *****************************************************************************************************************/
