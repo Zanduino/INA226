@@ -91,7 +91,7 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //
 /*******************************************************************************************************************
 ** Method getBusMilliVolts retrieves the bus voltage measurement                                                  **
 *******************************************************************************************************************/
-uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch=false) {        //                                  //
+uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch) {              //                                  //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER);                   // Get the raw value and apply      //
   busVoltage = (uint32_t)busVoltage*INA_BUS_VOLTAGE_LSB/100;                  // conversion to get milliVolts     //
@@ -104,7 +104,7 @@ uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch=false) {        //
 /*******************************************************************************************************************
 ** Method getShuntMicroVolts retrieves the shunt voltage measurement                                              **
 *******************************************************************************************************************/
-int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch=false) {       //                                  //
+int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch) {             //                                  //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   int16_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
@@ -133,7 +133,7 @@ int32_t INA226_Class::getBusMicroWatts() {                                    //
 /*******************************************************************************************************************
 ** Method setAveraging sets the hardware averaging for the different devices                                      **
 *******************************************************************************************************************/
-void INA226_Class::setAveraging(const uint16_t averages = UINT16_MAX) {       // Set the number of averages taken //
+void INA226_Class::setAveraging(const uint16_t averages ) {                   // Set the number of averages taken //
   uint8_t averageIndex;                                                       // Store indexed value for register //
   int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
   if      (averages>=1024) averageIndex = 7;                                  // setting depending upon range     //
@@ -151,7 +151,7 @@ void INA226_Class::setAveraging(const uint16_t averages = UINT16_MAX) {       //
 /*******************************************************************************************************************
 ** Method setBusConversion specifies the conversion rate (see datasheet for 8 distinct values) for the bus        **
 *******************************************************************************************************************/
-void INA226_Class::setBusConversion(uint8_t convTime = UINT8_MAX) {           // Set timing for Bus conversions   //
+void INA226_Class::setBusConversion(uint8_t convTime ) {                      // Set timing for Bus conversions   //
   if (convTime>7) convTime=7;                                                 // Use maximum value allowed        //
   int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
   configRegister &= ~INA_CONFIG_BUS_TIME_MASK;                                // zero out the Bus conversion part //
@@ -161,7 +161,7 @@ void INA226_Class::setBusConversion(uint8_t convTime = UINT8_MAX) {           //
 /*******************************************************************************************************************
 ** Method setShuntConversion specifies the conversion rate (see datasheet for 8 distinct values) for the shunt    **
 *******************************************************************************************************************/
-void INA226_Class::setShuntConversion(uint8_t convTime = UINT8_MAX) {         // Set timing for Bus conversions   //
+void INA226_Class::setShuntConversion(uint8_t convTime ) {                    // Set timing for Bus conversions   //
   if (convTime>7) convTime=7;                                                 // Use maximum value allowed        //
   int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
   configRegister &= ~INA_CONFIG_SHUNT_TIME_MASK;                              // zero out the Bus conversion part //
@@ -198,7 +198,7 @@ void INA226_Class::reset() {                                                  //
 ** Method setMode allows the various mode combinations to be set. If no parameter is given the system goes back   **
 ** to the default startup mode.                                                                                   **
 *******************************************************************************************************************/
-void INA226_Class::setMode(uint8_t mode = 7) {                                // Set the monitoring mode          //
+void INA226_Class::setMode(uint8_t mode ) {                                   // Set the monitoring mode          //
   int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
   configRegister &= ~INA_CONFIG_MODE_MASK;                                    // zero out the mode bits           //
   mode = B00001111 & mode;                                                    // Mask off unused bits             //
