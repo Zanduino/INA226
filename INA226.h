@@ -33,7 +33,8 @@
 **                                                                                                                **
 ** Vers.  Date       Developer           Comments                                                                 **
 ** ====== ========== =================== ======================================================================== **
-** 1.0.2  2017-07-30 Arnd@SV-Zanshin.Com Default value definitions only in the prototypes, not in definition      **
+** 1.0.3  2017-08-09 Arnd@SV-Zanshin.Com Work on Bug #4                                                           **
+** 1.0.2  2017-07-30 Arnd@SV-Zanshin.Com Optional parameter default values only in function prototypes            **
 ** 1.0.1  2017-05-26 Arnd@SV-Zanshin.Com Changed _CurrentLSB from uint16_t to uint32_t due to overflow bug        **
 ** 1.0.0  2017-01-10 Arnd@SV-Zanshin.Com Fixed library file name, added constants for setMode() call              **
 ** 1.0.0  2017-01-09 Arnd@SV-Zanshin.Com Added reset() and setMode() calls                                        **

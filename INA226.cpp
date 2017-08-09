@@ -1,7 +1,8 @@
 /*******************************************************************************************************************
-** INA class method definitions.                                                                                  **
+** INA class method definitions for INA226 Library.                                                               **
 **                                                                                                                **
-** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
+** See the INA226.h header file comments for version information. Detailed documentation for the library can be   **
+** found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki                                    **
 **                                                                                                                **
 ** This program is free software: you can redistribute it and/or modify it under the terms of the GNU General     **
 ** Public License as published by the Free Software Foundation, either version 3 of the License, or (at your      **
@@ -30,9 +31,9 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR) { //
     Wire.beginTransmission(_DeviceAddress);                                   // See if something is at address   //
     if (Wire.endTransmission() == 0) {                                        // by checking the return error     //
       writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
-      delay(10);                                                              // Wait for INA to finish resetting //
+      delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
       if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        _Current_LSB = (uint32_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB        //
+        _Current_LSB = (uint32_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB in nA  //
         _Calibration = 51200000/((int64_t)_Current_LSB*nanoOhmR/100000);      // Compute calibration register     //
         _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
         writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //

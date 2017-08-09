@@ -2,7 +2,6 @@
 ** Program to demonstrate the INA226 library for the Arduino IDE. A simple infinite loop of measurments will      **
 ** display the bus voltage and current running through the INA226.                                                **
 **                                                                                                                **
-**                                                                                                                **
 ** Detailed documentation can be found on the GitHub Wiki pages at https://github.com/SV-Zanshin/INA226/wiki      **
 **                                                                                                                **
 ** This example is for a INA226 set up to measure a 5-Volt load with a 0.1 Ohm resistor in place, this is the same**
@@ -28,6 +27,7 @@
 **                                                                                                                **
 ** Vers.   Date       Developer           Comments                                                                **
 ** ======= ========== =================== ======================================================================= **
+** 1.0.2   2017-08-09 Arnd@SV-Zanshin.Com Cosmetic changes                                                        **
 ** 1.0.1   2017-01-12 Arnd@SV-Zanshin.Com Minor code cleanup and added more comments                              **
 ** 1.0.0   2017-01-09 Arnd@SV-Zanshin.Com Cloned example from test program suite                                  **
 **                                                                                                                **
@@ -36,7 +36,6 @@
 /*******************************************************************************************************************
 ** Declare program Constants                                                                                      **
 *******************************************************************************************************************/
-const uint8_t  GREEN_LED_PIN         =     13;                                // Green LED (nonstandard location) //
 const uint32_t SERIAL_SPEED          = 115200;                                // Use fast serial speed            //
 /*******************************************************************************************************************
 ** Declare global variables and instantiate classes                                                               **
@@ -53,10 +52,10 @@ void    loop();                                                               //
 ** main loop for data measurement and storage.                                                                    **
 *******************************************************************************************************************/
 void setup() {                                                                //                                  //
-  pinMode(GREEN_LED_PIN, OUTPUT);                                             // Define the green LED as an output//
-  digitalWrite(GREEN_LED_PIN,true);                                           // Turn on the LED                  //
   Serial.begin(SERIAL_SPEED);                                                 // Start serial communications      //
-  delay(2000);                                                                // Wait for comms port to connect   //
+  #ifdef  __AVR_ATmega32U4__                                                  // If we are a 32U4 processor, then //
+    delay(2000);                                                              // wait 2 seconds for the serial    //
+  #endif                                                                      // interface to initialize          //
   Serial.print(F("\n\nDisplay INA226 Readings V1.0.1\n"));                    // Display program information      //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor      //
   INA226.begin(1,100000);                                                     //                                  //
@@ -70,18 +69,18 @@ void setup() {                                                                //
 ** run in a simple infinite loop                                                                                  **
 *******************************************************************************************************************/
 void loop() {                                                                 // Main program loop                //
-  Serial.print(F("Bus voltage:   "));
-  Serial.print((float)INA226.getBusMilliVolts()/1000.0,4);
-  Serial.println(F("V"));
-  Serial.print(F("Shunt voltage: "));
-  Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);
-  Serial.println(F("mV"));
-  Serial.print(F("Bus amperage:  "));
-  Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);
-  Serial.println(F("mA"));
-  Serial.print(F("Bus wattage:   "));
-  Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);
-  Serial.println(F("mW"));
-  Serial.println();
-  delay(5000);
-} // of method loop
+  Serial.print(F("Bus voltage:   "));                                         //                                  //
+  Serial.print((float)INA226.getBusMilliVolts()/1000.0,4);                    // Convert to millivolts            //
+  Serial.println(F("V"));                                                     //                                  //
+  Serial.print(F("Shunt voltage: "));                                         //                                  //
+  Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);                  // Convert to millivolts            //
+  Serial.println(F("mV"));                                                    //                                  //
+  Serial.print(F("Bus amperage:  "));                                         //                                  //
+  Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                     // Convert to milliamps             //
+  Serial.println(F("mA"));                                                    //                                  //
+  Serial.print(F("Bus wattage:   "));                                         //                                  //
+  Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                    // Convert to milliwatts            //
+  Serial.println(F("mW"));                                                    //                                  //
+  Serial.println();                                                           //                                  //
+  delay(5000);                                                                //                                  //
+} // of method loop                                                           //----------------------------------//
