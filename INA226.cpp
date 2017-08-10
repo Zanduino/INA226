@@ -27,11 +27,12 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t microOhmR) { /
       writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
       delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
       if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        _Current_LSB = (uint32_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB in nA  //
+        _Current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB in nA  //
         _Calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *         // Compute calibration register     //
                        (uint64_t)microOhmR / (uint64_t)100000);               // using 64 bit numbers throughout  //
         _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
         writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
+Serial.println(_Calibration,BIN);
         break;                                                                // Stop searching                   //
       } // of if-then we've found an INA226                                   //                                  //
     } // of if-then we have found a live device                               //                                  //

@@ -92,7 +92,8 @@ void setup() {                                                                //
   #endif                                                                      // interface to initialize          //
   Serial.print(F("\n\nBackground INA226 Read V1.0.0\n"));                     // Display program information      //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ω resistor        //
-  INA226.begin(1,100000);                                                     //                                  //
+//  INA226.begin(1,100000);                                                     //                                  //
+  INA226.begin(15,2000);                                                     //                                  //
   INA226.setAveraging(64);                                                    // Average each reading n-times     //
   INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
   INA226.setShuntConversion();                                                // Maximum conversion time 8.244ms  //
