@@ -14,14 +14,8 @@
 *******************************************************************************************************************/
 #include "INA226.h"                                                           // Include the header definition    //
 #include <Wire.h>                                                             // I2C Library definition           //
-/*******************************************************************************************************************
-** Class Constructor instantiates the class but otherwise does nothing, that is performed in "begin"              **
-*******************************************************************************************************************/
-INA226_Class::INA226_Class() {}                                               //                                  //
-/*******************************************************************************************************************
-** Class Destructor currently does nothing and is included for compatibility purposes                             **
-*******************************************************************************************************************/
-INA226_Class::~INA226_Class() {} // of unused class destructor                //                                  //
+INA226_Class::INA226_Class()  {}                                              // Unused class constructor         //
+INA226_Class::~INA226_Class() {}                                              // Unused class destructor          //
 /*******************************************************************************************************************
 ** Method begin() does all of the initialization work                                                             **
 *******************************************************************************************************************/
@@ -34,8 +28,8 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t nanoOhmR) { //
       delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
       if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
         _Current_LSB = (uint32_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB in nA  //
-        _Calibration = (int64_t)51200000 / ((int64_t)_Current_LSB *           // Compute calibration register     //
-                       (int64_t)nanoOhmR / (int64_t)100000);                  //                                  //
+        _Calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *         // Compute calibration register     //
+                       (uint64_t)nanoOhmR / (uint64_t)100000);                // using 64 bit numbers throughout  //
         _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
         writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
         break;                                                                // Stop searching                   //
@@ -66,9 +60,9 @@ int16_t INA226_Class::readWord(const uint8_t addr) {                          //
   delayMicroseconds(I2C_DELAY);                                               // delay required for sync          //
   Wire.requestFrom(_DeviceAddress, (uint8_t)2);                               // Request 2 consecutive bytes      //
   while(!Wire.available());                                                   // Wait until the byte is ready     //
-  returnData  = Wire.read();                                                  // Read the msb                     //
-  returnData  = returnData<<8;                                                // shift the data over              //
-  returnData |= Wire.read();                                                  // Read the lsb                     //
+  returnData = Wire.read();                                                   // Read the msb                     //
+  returnData = returnData<<8;                                                 // shift the data over              //
+  returnData|= Wire.read();                                                   // Read the lsb                     //
   return returnData;                                                          // read it and return it            //
 } // of method readWord()                                                     //                                  //
 /*******************************************************************************************************************

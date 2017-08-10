@@ -38,7 +38,8 @@
 **                                                                                                                **
 ** Vers.   Date       Developer           Comments                                                                **
 ** ======= ========== =================== ======================================================================= **
-** 1.0.1   2017-07-15 Arnd@SV-Zanshin.Com Cleaded up comments                                                     **
+** 1.0.2   2017-08-10 Arnd@SV-Zanshin.Com Further changes to comments                                             **
+** 1.0.1   2017-07-15 Arnd@SV-Zanshin.Com Cleaned up comments                                                     **
 ** 1.0.0   2017-01-12 Arnd@SV-Zanshin.Com Created example                                                         **
 **                                                                                                                **
 *******************************************************************************************************************/
@@ -74,11 +75,6 @@ ISR (PCINT0_vect) {                                                           //
   PCICR  |= bit (digitalPinToPCICRbit(INA226_ALERT_PIN));                     // enable interrupt for the group   //
 } // of ISR handler for INT0 group of pins                                    //                                  //
 /*******************************************************************************************************************
-** Declare prototypes for all functions used                                                                      **
-*******************************************************************************************************************/
-void    setup();                                                              // Called once on power-up/restart  //
-void    loop();                                                               // Called repeatedly after setup()  //
-/*******************************************************************************************************************
 ** Method Setup(). This is an Arduino IDE method which is called first upon initial boot or restart. It is only   **
 ** called one time and all of the variables and other initialization calls are done here prior to entering the    **
 ** main loop for data measurement.                                                                                **
@@ -91,7 +87,9 @@ void setup() {                                                                //
   PCIFR  |= bit (digitalPinToPCICRbit(INA226_ALERT_PIN));                     // clear any outstanding interrupt  //
   PCICR  |= bit (digitalPinToPCICRbit(INA226_ALERT_PIN));                     // enable interrupt for the group   //
   Serial.begin(SERIAL_SPEED);                                                 // Start serial communications      //
-  delay(2000);                                                                // Wait for comms port to connect   //
+  #ifdef  __AVR_ATmega32U4__                                                  // If this is a 32U4 processor,     //
+    delay(3000);                                                              // wait 3 seconds for serial port   //
+  #endif                                                                      // interface to initialize          //
   Serial.print(F("\n\nBackground INA226 Read V1.0.0\n"));                     // Display program information      //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ω resistor        //
   INA226.begin(1,100000);                                                     //                                  //
@@ -107,13 +105,6 @@ void setup() {                                                                //
 *******************************************************************************************************************/
 void loop() {                                                                 // Main program loop                //
   static long lastMillis = millis();                                          // Store the last time we printed   //
-
-
-                               /****************************************
-                               ** Perform the program processing here **
-                               ****************************************/
-
-
   /*****************************************************************************************************************
   ** Check to see if we have collected 10 or more readings each main loop iteration, and display the time and     **
   ** average information before resetting the values. Interrupts are turned off when resetting the values to      **
@@ -129,9 +120,9 @@ void loop() {                                                                 //
     Serial.print(F("mA\n\n"));                                                //                                  //
     lastMillis = millis();                                                    //                                  //
     cli();                                                                    // Disable interrupts               //
-      readings        = 0;                                                    // Reset values                     //
-      sumBusMillVolts = 0;                                                    // Reset values                     //
-      sumBusMicroAmps = 0;                                                    // Reset values                     //
+    readings        = 0;                                                      // Reset values                     //
+    sumBusMillVolts = 0;                                                      // Reset values                     //
+    sumBusMicroAmps = 0;                                                      // Reset values                     //
     sei();                                                                    // Enable interrupts                //
   } // of if-then we've reached the required amount of readings               //                                  //
 } // of method loop                                                           //----------------------------------//
