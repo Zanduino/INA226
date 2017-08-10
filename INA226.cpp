@@ -32,7 +32,6 @@ void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t microOhmR) { /
                        (uint64_t)microOhmR / (uint64_t)100000);               // using 64 bit numbers throughout  //
         _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
         writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
-Serial.println(_Calibration,BIN);
         break;                                                                // Stop searching                   //
       } // of if-then we've found an INA226                                   //                                  //
     } // of if-then we have found a live device                               //                                  //
