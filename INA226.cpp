@@ -102,13 +102,13 @@ uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch) {              //
 *******************************************************************************************************************/
 int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch) {             //                                  //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
-  int16_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
+  int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
   if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,0)) {              // If triggered and shunt active    //
     int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
     writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //
   } // of if-then triggered mode enabled                                      //                                  //
-  return(shuntVoltage);                                                       // return computed microvolts       //
+  return((int16_t)shuntVoltage);                                              // return computed microvolts       //
 } // of method getShuntMicroVolts()                                           //                                  //
 /*******************************************************************************************************************
 ** Method getBusMicroAmps retrieves the computed current in microamps.                                            **
