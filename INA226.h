@@ -33,7 +33,8 @@
 **                                                                                                                **
 ** Vers.  Date       Developer           Comments                                                                 **
 ** ====== ========== =================== ======================================================================== **
-** 1.0.3  2017-08-09 Arnd@SV-Zanshin.Com Work on GitHub Bug #4 with overflow values where not expected            **
+** 1.0.3  2017-08-09 Arnd@SV-Zanshin.Com Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows in compu-   **
+**                                       tations of begin() and getShuntMicroVolts() functions.                   **
 ** 1.0.2  2017-07-30 Arnd@SV-Zanshin.Com Optional parameter default values only in function prototypes            **
 ** 1.0.1  2017-05-26 Arnd@SV-Zanshin.Com Changed _CurrentLSB from uint16_t to uint32_t due to overflow bug        **
 ** 1.0.0  2017-01-10 Arnd@SV-Zanshin.Com Fixed library file name, added constants for setMode() call              **
@@ -72,7 +73,6 @@
   const uint8_t  INA_MODE_CONTINUOUS_SHUNT    =   B101;                       // Continuous shunt, no bus         //
   const uint8_t  INA_MODE_CONTINUOUS_BUS      =   B110;                       // Continuous bus, no shunt         //
   const uint8_t  INA_MODE_CONTINUOUS_BOTH     =   B111;                       // Both continuous, default value   //
-
   /*****************************************************************************************************************
   ** Declare class header                                                                                         **
   *****************************************************************************************************************/

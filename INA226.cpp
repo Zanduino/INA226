@@ -19,7 +19,7 @@ INA226_Class::~INA226_Class() {}                                              //
 /*******************************************************************************************************************
 ** Method begin() does all of the initialization work                                                             **
 *******************************************************************************************************************/
-void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t microOhmR) { // Class initializer                //
+void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t microOhmR){ // Class initializer                //
   Wire.begin();                                                               // Start the I2C wire subsystem     //
   for(_DeviceAddress = 1;_DeviceAddress<127;_DeviceAddress++) {               // Loop for each possible address   //
     Wire.beginTransmission(_DeviceAddress);                                   // See if something is at address   //
