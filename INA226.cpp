@@ -46,7 +46,6 @@ uint8_t INA226_Class::readByte(const uint8_t addr) {                          //
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
   delayMicroseconds(I2C_DELAY);                                               // delay required for sync          //
   Wire.requestFrom(_DeviceAddress, (uint8_t)1);                               // Request 1 byte of data           //
-  while(!Wire.available());                                                   // Wait until the byte is ready     //
   return Wire.read();                                                         // read it and return it            //
 } // of method readByte()                                                     //                                  //
 /*******************************************************************************************************************
@@ -59,7 +58,6 @@ int16_t INA226_Class::readWord(const uint8_t addr) {                          //
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
   delayMicroseconds(I2C_DELAY);                                               // delay required for sync          //
   Wire.requestFrom(_DeviceAddress, (uint8_t)2);                               // Request 2 consecutive bytes      //
-  while(!Wire.available());                                                   // Wait until the byte is ready     //
   returnData = Wire.read();                                                   // Read the msb                     //
   returnData = returnData<<8;                                                 // shift the data over              //
   returnData|= Wire.read();                                                   // Read the lsb                     //

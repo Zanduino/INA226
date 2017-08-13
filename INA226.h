@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer           Comments                                                                 **
 ** ====== ========== =================== ======================================================================== **
+** 1.0.4  2017-08-13 Arnd@SV-Zanshin.Com Enhancement #5, removed extraneous while() loop after Wire.requestFrom() **
 ** 1.0.3  2017-08-09 Arnd@SV-Zanshin.Com Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows in compu-   **
 **                                       tations of begin() and getShuntMicroVolts() functions.                   **
 ** 1.0.2  2017-07-30 Arnd@SV-Zanshin.Com Optional parameter default values only in function prototypes            **
