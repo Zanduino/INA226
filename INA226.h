@@ -31,17 +31,17 @@
 ** GNU General Public License for more details. You should have received a copy of the GNU General Public License **
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.                                          **
 **                                                                                                                **
-** Vers.  Date       Developer           Comments                                                                 **
-** ====== ========== =================== ======================================================================== **
-** 1.0.4  2017-08-13 Arnd@SV-Zanshin.Com Enhancement #5, removed extraneous while() loop after Wire.requestFrom() **
-** 1.0.3  2017-08-09 Arnd@SV-Zanshin.Com Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows in compu-   **
-**                                       tations of begin() and getShuntMicroVolts() functions.                   **
-** 1.0.2  2017-07-30 Arnd@SV-Zanshin.Com Optional parameter default values only in function prototypes            **
-** 1.0.1  2017-05-26 Arnd@SV-Zanshin.Com Changed _CurrentLSB from uint16_t to uint32_t due to overflow bug        **
-** 1.0.0  2017-01-10 Arnd@SV-Zanshin.Com Fixed library file name, added constants for setMode() call              **
-** 1.0.0  2017-01-09 Arnd@SV-Zanshin.Com Added reset() and setMode() calls                                        **
-** 1.0.b2 2017-01-08 Arnd@SV-Zanshin.Com Removed INA219 code, concentrating on only the INA226                    **
-** 1.0.b1 2017-01-05 Arnd@SV-Zanshin.Com Created class                                                            **
+** Vers.  Date       Developer                     Comments                                                       **
+** ====== ========== ============================= ============================================================== **
+** 1.0.4  2017-08-13 https://github.com/SV-Zanshin Enhancement #5, removed while() loop after Wire.requestFrom()  **
+** 1.0.3  2017-08-09 https://github.com/SV-Zanshin Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows   **
+**                                                 in computations of begin() and getShuntMicroVolts() functions. **
+** 1.0.2  2017-07-30 https://github.com/SV-Zanshin Optional parameter default values only in function prototypes  **
+** 1.0.1  2017-05-26 https://github.com/SV-Zanshin Changed _CurrentLSB from uint16_t to uint32_t due to overflow  **
+** 1.0.0  2017-01-10 https://github.com/SV-Zanshin Fixed library file name, added constants for setMode() call    **
+** 1.0.0  2017-01-09 https://github.com/SV-Zanshin Added reset() and setMode() calls                              **
+** 1.0.b2 2017-01-08 https://github.com/SV-Zanshin Removed INA219 code, concentrating on only the INA226          **
+** 1.0.b1 2017-01-05 https://github.com/SV-Zanshin Created class                                                  **
 **                                                                                                                **
 *******************************************************************************************************************/
 #include "Arduino.h"                                                          // Arduino data type definitions    //
