@@ -25,11 +25,11 @@
 ** GNU General Public License for more details. You should have received a copy of the GNU General Public License **
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.                                          **
 **                                                                                                                **
-** Vers.   Date       Developer           Comments                                                                **
-** ======= ========== =================== ======================================================================= **
-** 1.0.2   2017-08-09 Arnd@SV-Zanshin.Com Cosmetic changes                                                        **
-** 1.0.1   2017-01-12 Arnd@SV-Zanshin.Com Minor code cleanup and added more comments                              **
-** 1.0.0   2017-01-09 Arnd@SV-Zanshin.Com Cloned example from test program suite                                  **
+** Vers.  Date       Developer                     Comments                                                       **
+** ====== ========== ============================= ============================================================== **
+** 1.0.2   2017-08-09 https://github.com/SV-Zanshin Cosmetic changes                                              **
+** 1.0.1   2017-01-12 https://github.com/SV-Zanshin Minor code cleanup and added more comments                    **
+** 1.0.0   2017-01-09 https://github.com/SV-Zanshin Cloned example from test program suite                        **
 **                                                                                                                **
 *******************************************************************************************************************/
 #include <INA226.h>                                                           // INA226 Library                   //
