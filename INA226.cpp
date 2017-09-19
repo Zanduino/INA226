@@ -49,47 +49,43 @@ void INA226_Class::begin(const uint8_t maxBusAmps,                            //
                          const uint32_t microOhmR,                            //                                  // 
                          const uint8_t deviceNumber ) {                       //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
   ina.current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                    // Get the best possible LSB in nA  //
   ina.calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *            // Compute calibration register     //
                     (uint64_t)microOhmR / (uint64_t)100000);                  // using 64 bit numbers throughout  //
   ina.power_LSB   = (uint32_t)25*_Current_LSB;                                // Fixed multiplier for INA219      //
   if (deviceNumber==UINT8_MAX) {                                              // If default value, then set all   //
-    for(uint8_t i=0;i<_DeviceCount;i++) EEPROM.put(i*sizeof(ina),ina);        // Write value to address           //
-
-//    writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
-
-
+    for(uint8_t i=0;i<_DeviceCount;i++) {                                     // For each device write data       //
+      EEPROM.put(i*sizeof(ina),ina);                                          // Write value to address           //
+      writeWord(INA_CALIBRATION_REGISTER,ina.calibration,ina.address);        // Write the calibration value      //
+    } // of for each device                                                   //                                  //
   } else {                                                                    //                                  //
     EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);               // Write struct, cater for overflow //
-//    writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
+    writeWord(INA_CALIBRATION_REGISTER,ina.calibration,ina.address);          // Write the calibration value      //
   } // of if-then-else set one or all devices                                 //                                  //
-  
-  
-  
-
   return;                                                                     // Return number of devices found   //
 } // of method begin()                                                        //                                  //
 /*******************************************************************************************************************
 ** Method readByte reads 1 byte from the specified address                                                        **
 *******************************************************************************************************************/
-uint8_t INA226_Class::readByte(const uint8_t addr) {                          //                                  //
-  Wire.beginTransmission(_DeviceAddress);                                     // Address the I2C device           //
+uint8_t INA226_Class::readByte(const uint8_t addr,const uint8_t deviceAddr){  //                                  //
+  Wire.beginTransmission(deviceAddr);                                         // Address the I2C device           //
   Wire.write(addr);                                                           // Send the register address to read//
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
   delayMicroseconds(I2C_DELAY);                                               // delay required for sync          //
-  Wire.requestFrom(_DeviceAddress, (uint8_t)1);                               // Request 1 byte of data           //
+  Wire.requestFrom(deviceAddr, (uint8_t)1);                                   // Request 1 byte of data           //
   return Wire.read();                                                         // read it and return it            //
 } // of method readByte()                                                     //                                  //
 /*******************************************************************************************************************
 ** Method readWord reads 2 bytes from the specified address                                                       **
 *******************************************************************************************************************/
-int16_t INA226_Class::readWord(const uint8_t addr) {                          //                                  //
+int16_t INA226_Class::readWord(const uint8_t addr,const uint8_t deviceAddr){  //                                  //
   int16_t returnData;                                                         // Store return value               //
-  Wire.beginTransmission(_DeviceAddress);                                     // Address the I2C device           //
+  Wire.beginTransmission(deviceAddr);                                         // Address the I2C device           //
   Wire.write(addr);                                                           // Send the register address to read//
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
   delayMicroseconds(I2C_DELAY);                                               // delay required for sync          //
-  Wire.requestFrom(_DeviceAddress, (uint8_t)2);                               // Request 2 consecutive bytes      //
+  Wire.requestFrom(deviceAddr, (uint8_t)2);                                   // Request 2 consecutive bytes      //
   returnData = Wire.read();                                                   // Read the msb                     //
   returnData = returnData<<8;                                                 // shift the data over              //
   returnData|= Wire.read();                                                   // Read the lsb                     //
@@ -98,8 +94,9 @@ int16_t INA226_Class::readWord(const uint8_t addr) {                          //
 /*******************************************************************************************************************
 ** Method writeByte write 1 byte to the specified address                                                         **
 *******************************************************************************************************************/
-void INA226_Class::writeByte(const uint8_t addr, const uint8_t data) {        //                                  //
-  Wire.beginTransmission(_DeviceAddress);                                     // Address the I2C device           //
+void INA226_Class::writeByte(const uint8_t addr, const uint8_t data,          //                                  //
+                             const uint8_t deviceAddr) {                      //                                  //
+  Wire.beginTransmission(deviceAddr);                                         // Address the I2C device           //
   Wire.write(addr);                                                           // Send register address to write   //
   Wire.write(data);                                                           // Send the data to write           //
   _TransmissionStatus = Wire.endTransmission();                               // Close transmission               //
@@ -107,8 +104,9 @@ void INA226_Class::writeByte(const uint8_t addr, const uint8_t data) {        //
 /*******************************************************************************************************************
 ** Method writeWord writes 2 byte to the specified address                                                        **
 *******************************************************************************************************************/
-void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //                                  //
-  Wire.beginTransmission(_DeviceAddress);                                     // Address the I2C device           //
+void INA226_Class::writeWord(const uint8_t addr, const uint16_t data,         //                                  //
+                            const uint8_t deviceAddr) {                       //                                  //
+  Wire.beginTransmission(deviceAddr);                                         // Address the I2C device           //
   Wire.write(addr);                                                           // Send register address to write   //
   Wire.write((uint8_t)(data>>8));                                             // Write the first byte             //
   Wire.write((uint8_t)data);                                                  // and then the second              //
@@ -117,26 +115,32 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data) {       //
 /*******************************************************************************************************************
 ** Method getBusMilliVolts retrieves the bus voltage measurement                                                  **
 *******************************************************************************************************************/
-uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch) {              //                                  //
+uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch,                //                                  //
+                                        const uint8_t deviceNumber) {         //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
-  uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER);                   // Get the raw value and apply      //
+  uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER,ina.address);       // Get the raw value and apply      //
   busVoltage = (uint32_t)busVoltage*INA_BUS_VOLTAGE_LSB/100;                  // conversion to get milliVolts     //
-  if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,1)) {              // If triggered mode and bus active //
-    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
-    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //
+  if (!bitRead(ina.operatingMode,2) && bitRead(ina.operatingMode,1)) {        // If triggered mode and bus active //
+    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);// Get the current register         //
+    writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);         // Write back to trigger next       //
   } // of if-then triggered mode enabled                                      //                                  //
   return(busVoltage);                                                         // return computed milliVolts       //
 } // of method getBusMilliVolts()                                             //                                  //
 /*******************************************************************************************************************
 ** Method getShuntMicroVolts retrieves the shunt voltage measurement                                              **
 *******************************************************************************************************************/
-int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch) {             //                                  //
+int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch,               //                                  //
+                                         const uint8_t deviceNumber) {        //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
-  int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER);                // Get the raw value                //
+  int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER,ina.address);    // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
-  if (!bitRead(_OperatingMode,2) && bitRead(_OperatingMode,0)) {              // If triggered and shunt active    //
-    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);            // Get the current register         //
-    writeWord(INA_CONFIGURATION_REGISTER,configRegister);                     // Write back to trigger next       //
+  if (!bitRead(ina.operatingMode,2) && bitRead(ina.operatingMode,0)) {        // If triggered and shunt active    //
+    int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);// Get the current register         //
+    writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);         // Write back to trigger next       //
   } // of if-then triggered mode enabled                                      //                                  //
   return((int16_t)shuntVoltage);                                              // return computed microvolts       //
 } // of method getShuntMicroVolts()                                           //                                  //
