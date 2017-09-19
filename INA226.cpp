@@ -14,59 +14,60 @@
 *******************************************************************************************************************/
 #include "INA226.h"                                                           // Include the header definition    //
 #include <Wire.h>                                                             // I2C Library definition           //
+#include <EEPROM.h>                                                           // Include the EEPROM library       //
+
 /*******************************************************************************************************************
 ** Class constructor takes no parameters, but searches the I2C bus to see how many of the 16 possible INA226s are **
 ** found and allocates sufficient memory to store all data about them.                                            **
 *******************************************************************************************************************/
 INA226_Class::INA226_Class() {                                                // Class constructor                //
+  inaDet ina;                                                                 // Hold device details in structure //
   Wire.begin();                                                               // Start the I2C wire subsystem     //
   for(uint8_t deviceAddress = 1;deviceAddress<127;deviceAddress++) {          // Loop for each possible address   //
     Wire.beginTransmission(deviceAddress);                                    // See if something is at address   //
     if (Wire.endTransmission() == 0) {                                        // by checking the return error     //
       writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
       delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
-      if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION)    // Yes, we've found an INA226!      //
-        inaCount++;                                                           // Increment the counter            //
+      if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
+        ina.address       = deviceAddress;                                    // Store device address             //
+        ina.operatingMode = B111;                                             // Default to continuous mode       //
+        if (_DeviceCount*sizeof(ina)<EEPROM.length()) {                       // If there's space left in EEPROM  //
+          EEPROM.put(_DeviceCount*sizeof(ina),ina);                           // Add the structure                //
+          _DeviceCount++;                                                     // Increment the device counter     //
+        } // of if-then the values will fit into EEPROM                       //                                  //
+      } // of if-then we have identified a INA226                             //                                  //
     } // of if-then we have found a live device                               //                                  //
   } // for-next each possible I2C address                                     //                                  //
-  if (inaCount) ina = new inaDet [inaCount]; else return;                     // Dynamically allocate space       //
-  uint8_t currentIndex = 0;
-  for(uint8_t deviceAddress = 1;deviceAddress<127;deviceAddress++) {          // Loop for each possible address   //
-    Wire.beginTransmission(deviceAddress);                                    // See if something is at address   //
-    if (Wire.endTransmission() == 0) {                                        // by checking the return error     //
-      writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
-      delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
-      if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        ina[currentIndex].address       = deviceAddress;                      // Store address of this device     //
-        ina[currentIndex].operatingMode = B111;                               // Default continuous mode operation//
-      } // of if-then we've found an INA226                                 //                                  //
-    } // of if-then we have found a live device                             //                                  //
-  } // for-next each possible I2C address                                   //                                  //
 } // of class constructor                                                     //                                  //
 INA226_Class::~INA226_Class() {}                                              // Unused class destructor          //
 /*******************************************************************************************************************
-** Method begin() does all of the initialization work. The number of INA226s found is determined as part of the   **
-** the class constructor and is store in "inaCount". The INA226 device number is the optional 3rd parameter to    **
-** allow backward compatibility to the original library                                                           **
+** Method begin() sets the INA226 Configuration details, without which meaningful readings cannot be made. If it  **
+** is called without the option deviceNumber parameter then the settings are applied to all devices, otherwise    **
+** just that specific device is targeted.                                                                         **
 *******************************************************************************************************************/
-void INA226_Class::begin(const uint8_t maxBusAmps, const uint32_t microOhmR){ // Class initializer                //
-  uint8_t currentDevice = 0;                                                  // Internal array address           //
-  for(_DeviceAddress = 1;_DeviceAddress<127;_DeviceAddress++) {               // Loop for each possible address   //
-    Wire.beginTransmission(_DeviceAddress);                                   // See if something is at address   //
-    if (Wire.endTransmission() == 0) {                                        // by checking the return error     //
-      writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
-      delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
-      if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        _Current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                 // Get the best possible LSB in nA  //
-        _Calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *         // Compute calibration register     //
-                       (uint64_t)microOhmR / (uint64_t)100000);               // using 64 bit numbers throughout  //
-        _Power_LSB   = (uint32_t)25*_Current_LSB;                             // Fixed multiplier for INA219      //
-        writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
-          break;                                                              // Stop searching                   //
-      } // of if-then we've found an INA226                                 //                                  //
-    } // of if-then we have found a live device                             //                                  //
-  } // for-next each possible I2C address                                   //                                  //
-  return inaCount;                                                            // Return number of devices foudn   //
+void INA226_Class::begin(const uint8_t maxBusAmps,                            // Class initializer                //
+                         const uint32_t microOhmR,                            //                                  // 
+                         const uint8_t deviceNumber ) {                       //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  ina.current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                    // Get the best possible LSB in nA  //
+  ina.calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *            // Compute calibration register     //
+                    (uint64_t)microOhmR / (uint64_t)100000);                  // using 64 bit numbers throughout  //
+  ina.power_LSB   = (uint32_t)25*_Current_LSB;                                // Fixed multiplier for INA219      //
+  if (deviceNumber==UINT8_MAX) {                                              // If default value, then set all   //
+    for(uint8_t i=0;i<_DeviceCount;i++) EEPROM.put(i*sizeof(ina),ina);        // Write value to address           //
+
+//    writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
+
+
+  } else {                                                                    //                                  //
+    EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);               // Write struct, cater for overflow //
+//    writeWord(INA_CALIBRATION_REGISTER,_Calibration);                     // Write the calibration value      //
+  } // of if-then-else set one or all devices                                 //                                  //
+  
+  
+  
+
+  return;                                                                     // Return number of devices found   //
 } // of method begin()                                                        //                                  //
 /*******************************************************************************************************************
 ** Method readByte reads 1 byte from the specified address                                                        **

@@ -33,7 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
-** 1.0.5a 2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple Devices**
+** 1.0.5a 2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.4  2017-08-13 https://github.com/SV-Zanshin Enhancement #5, removed while() loop after Wire.requestFrom()  **
 ** 1.0.3  2017-08-09 https://github.com/SV-Zanshin Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows   **
 **                                                 in computations of begin() and getShuntMicroVolts() functions. **
@@ -53,9 +53,7 @@
   *****************************************************************************************************************/
   typedef struct {                                                            // Structure of values per device   //
     uint8_t  address;                                                         // I2C Address of device            //
-    uint8_t  transmissionStatus;                                              // Return code for I2C transmission //
     uint16_t calibration;                                                     // Calibration register value       //
-    uint16_t configuration;                                                   // Configuration register value     //
     uint32_t current_LSB;                                                     // Amperage LSB                     //
     uint32_t power_LSB;                                                       // Wattage LSB                      //
     uint8_t  operatingMode;                                                   // Default continuous mode operation//
@@ -96,7 +94,9 @@
     public:                                                                   // Publicly visible methods         //
       INA226_Class();                                                         // Class constructor                //
       ~INA226_Class();                                                        // Class destructor                 //
-      void     begin(const uint8_t maxBusAmps, const uint32_t microOhmR);     // Class initializer                //
+      void     begin(const uint8_t  maxBusAmps,                               // Class initializer                //
+                     const uint32_t microOhmR,                                //                                  //
+                     const uint8_t  deviceNumber = UINT8_MAX );               //                                 //
       uint16_t getBusMilliVolts(const bool waitSwitch=false);                 // Retrieve Bus voltage in mV       //
       int16_t  getShuntMicroVolts(const bool waitSwitch=false);               // Retrieve Shunt voltage in uV     //
       int32_t  getBusMicroAmps();                                             // Retrieve micro-amps              //
@@ -116,11 +116,9 @@
       uint8_t  _DeviceAddress      = 0;                                       // First I2C address found          //
       uint8_t  _TransmissionStatus = 0;                                       // Return code for I2C transmission //
       uint16_t _Calibration        = 0;                                       // Calibration register value       //
-      uint16_t _Configuration      = 0;                                       // Configuration register value     //
       uint32_t _Current_LSB        = 0;                                       // Amperage LSB                     //
       uint32_t _Power_LSB          = 0;                                       // Wattage LSB                      //
       uint8_t  _OperatingMode      = B111;                                    // Default continuous mode operation//
-      inaDet*  ina                 = 0;                                       // INA226 array with zero elements  //
-      uint8_t  inaCount            = 0;                                       // Array of INA226 details at size 0//
+      uint8_t  _DeviceCount        = 0;                                       // Number of INA226s detected       //
   }; // of INA226_Class definition                                            //                                  //
 #endif                                                                        //----------------------------------//
