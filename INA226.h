@@ -94,22 +94,26 @@
     public:                                                                   // Publicly visible methods         //
       INA226_Class();                                                         // Class constructor                //
       ~INA226_Class();                                                        // Class destructor                 //
-      void     begin(const uint8_t  maxBusAmps,                               // Class initializer                //
+      uint8_t  begin(const uint8_t  maxBusAmps,                               // Class initializer                //
                      const uint32_t microOhmR,                                //                                  //
                      const uint8_t  deviceNumber = UINT8_MAX );               //                                  //
       uint16_t getBusMilliVolts(const bool waitSwitch=false,                  // Retrieve Bus voltage in mV       //
                                 const uint8_t deviceNumber=0);                //                                  //
       int16_t  getShuntMicroVolts(const bool waitSwitch=false,                // Retrieve Shunt voltage in uV     //
                                   const uint8_t deviceNumber=0);              //                                  //
-      int32_t  getBusMicroAmps();                                             // Retrieve micro-amps              //
-      int32_t  getBusMicroWatts();                                            // Retrieve micro-watts             //
-      void     reset();                                                       // Reset the device                 //
-      void     setMode(uint8_t mode = 7);                                     // Set the monitoring mode          //
-      void     setAveraging(const uint16_t averages = UINT16_MAX);            // Set the number of averages taken //
-      void     setBusConversion(uint8_t convTime = UINT8_MAX);                // Set timing for Bus conversions   //
-      void     setShuntConversion(uint8_t convTime = UINT8_MAX);              // Set timing for Shunt conversions //
-      void     setAlertPinOnConversion(const bool alertState);                // Enable pin change on conversion  //
-      void     waitForConversion();                                           // wait for conversion to complete  //
+      int32_t  getBusMicroAmps(const uint8_t deviceNumber=0);                 // Retrieve micro-amps              //
+      int32_t  getBusMicroWatts(const uint8_t deviceNumber=0);                // Retrieve micro-watts             //
+      void     reset(const uint8_t deviceNumber=0);                           // Reset the device                 //
+      void     setMode(const uint8_t mode,const uint8_t devNumber=UINT8_MAX); // Set the monitoring mode          //
+      void     setAveraging(const uint16_t averages,                          // Set the number of averages taken //
+                            const uint8_t deviceNumber=UINT8_MAX);            //                                  //
+      void     setBusConversion(uint8_t convTime,                             // Set timing for Bus conversions   //
+                                const uint8_t deviceNumber=UINT8_MAX);        //                                  //
+      void     setShuntConversion(uint8_t convTime,                           // Set timing for Shunt conversions //
+                                  const uint8_t deviceNumber=UINT8_MAX);      //                                  //
+      void     waitForConversion(const uint8_t deviceNumber=UINT8_MAX);       // wait for conversion to complete  //
+      void     setAlertPinOnConversion(const bool alertState,                 // Enable pin change on conversion  //
+                                       const uint8_t deviceNumber=UINT8_MAX); //                                  //
     private:                                                                  // Private variables and methods    //
       uint8_t  readByte(const uint8_t addr,const uint8_t deviceAddress=0);    // Read a byte from an I2C address  //
       int16_t  readWord(const uint8_t addr,const uint8_t deviceAddress=0);    // Read a word from an I2C address  //
@@ -117,12 +121,7 @@
                          const uint8_t deviceAddress=0);                      //                                  //
       void     writeWord(const uint8_t addr, const uint16_t data,             // Write two bytes to an I2C address//
                          const uint8_t deviceAddress=0);                      //                                  //
-      uint8_t  _DeviceAddress      = 0;                                       // First I2C address found          //
       uint8_t  _TransmissionStatus = 0;                                       // Return code for I2C transmission //
-      uint16_t _Calibration        = 0;                                       // Calibration register value       //
-      uint32_t _Current_LSB        = 0;                                       // Amperage LSB                     //
-      uint32_t _Power_LSB          = 0;                                       // Wattage LSB                      //
-//      uint8_t  _OperatingMode      = B111;                                    // Default continuous mode operation//
       uint8_t  _DeviceCount        = 0;                                       // Number of INA226s detected       //
   }; // of INA226_Class definition                                            //                                  //
 #endif                                                                        //----------------------------------//

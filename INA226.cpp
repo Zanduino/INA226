@@ -45,15 +45,15 @@ INA226_Class::~INA226_Class() {}                                              //
 ** is called without the option deviceNumber parameter then the settings are applied to all devices, otherwise    **
 ** just that specific device is targeted.                                                                         **
 *******************************************************************************************************************/
-void INA226_Class::begin(const uint8_t maxBusAmps,                            // Class initializer                //
-                         const uint32_t microOhmR,                            //                                  // 
-                         const uint8_t deviceNumber ) {                       //                                  //
+uint8_t INA226_Class::begin(const uint8_t maxBusAmps,                         // Class initializer                //
+                            const uint32_t microOhmR,                         //                                  // 
+                            const uint8_t deviceNumber ) {                    //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
   EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
   ina.current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                    // Get the best possible LSB in nA  //
-  ina.calibration = (uint64_t)51200000 / ((uint64_t)_Current_LSB *            // Compute calibration register     //
+  ina.calibration = (uint64_t)51200000 / ((uint64_t)ina.current_LSB *         // Compute calibration register     //
                     (uint64_t)microOhmR / (uint64_t)100000);                  // using 64 bit numbers throughout  //
-  ina.power_LSB   = (uint32_t)25*_Current_LSB;                                // Fixed multiplier for INA219      //
+  ina.power_LSB   = (uint32_t)25*ina.current_LSB;                             // Fixed multiplier for INA219      //
   if (deviceNumber==UINT8_MAX) {                                              // If default value, then set all   //
     for(uint8_t i=0;i<_DeviceCount;i++) {                                     // For each device write data       //
       EEPROM.put(i*sizeof(ina),ina);                                          // Write value to address           //
@@ -63,7 +63,7 @@ void INA226_Class::begin(const uint8_t maxBusAmps,                            //
     EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);               // Write struct, cater for overflow //
     writeWord(INA_CALIBRATION_REGISTER,ina.calibration,ina.address);          // Write the calibration value      //
   } // of if-then-else set one or all devices                                 //                                  //
-  return;                                                                     // Return number of devices found   //
+  return _DeviceCount;                                                        // Return number of devices found   //
 } // of method begin()                                                        //                                  //
 /*******************************************************************************************************************
 ** Method readByte reads 1 byte from the specified address                                                        **
@@ -147,92 +147,145 @@ int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch,               //
 /*******************************************************************************************************************
 ** Method getBusMicroAmps retrieves the computed current in microamps.                                            **
 *******************************************************************************************************************/
-int32_t INA226_Class::getBusMicroAmps() {                                     //                                  //
-  int32_t microAmps = readWord(INA_CURRENT_REGISTER);                         // Get the raw value                //
-  microAmps = (int64_t)microAmps*_Current_LSB/1000;                           // Convert to microamps             //
+int32_t INA226_Class::getBusMicroAmps(const uint8_t deviceNumber) {           //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  int32_t microAmps = readWord(INA_CURRENT_REGISTER,ina.address);             // Get the raw value                //
+          microAmps = (int64_t)microAmps*ina.current_LSB/1000;                // Convert to microamps             //
   return(microAmps);                                                          // return computed microamps        //
 } // of method getBusMicroAmps()                                              //                                  //
 /*******************************************************************************************************************
 ** Method getBusMicroWatts retrieves the computed power in milliwatts                                             **
 *******************************************************************************************************************/
-int32_t INA226_Class::getBusMicroWatts() {                                    //                                  //
-  int32_t microWatts = readWord(INA_POWER_REGISTER);                          // Get the raw value                //
-  microWatts = (int64_t)microWatts*_Power_LSB/1000;                           // Convert to milliwatts            //
+int32_t INA226_Class::getBusMicroWatts(const uint8_t deviceNumber) {          //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  int32_t microWatts = readWord(INA_POWER_REGISTER,ina.address);              // Get the raw value                //
+          microWatts = (int64_t)microWatts*ina.power_LSB/1000;                // Convert to milliwatts            //
   return(microWatts);                                                         // return computed milliwatts       //
 } // of method getBusMicroWatts()                                             //                                  //
 /*******************************************************************************************************************
-** Method setAveraging sets the hardware averaging for the different devices                                      **
-*******************************************************************************************************************/
-void INA226_Class::setAveraging(const uint16_t averages ) {                   // Set the number of averages taken //
-  uint8_t averageIndex;                                                       // Store indexed value for register //
-  int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
-  if      (averages>=1024) averageIndex = 7;                                  // setting depending upon range     //
-  else if (averages>= 512) averageIndex = 6;                                  //                                  //
-  else if (averages>= 256) averageIndex = 5;                                  //                                  //
-  else if (averages>= 128) averageIndex = 4;                                  //                                  //
-  else if (averages>=  64) averageIndex = 3;                                  //                                  //
-  else if (averages>=  16) averageIndex = 2;                                  //                                  //
-  else if (averages>=   4) averageIndex = 1;                                  //                                  //
-  else                     averageIndex = 0;                                  //                                  //
-  configRegister &= ~INA_CONFIG_AVG_MASK;                                     // zero out the averages part       //
-  configRegister |= (uint16_t)averageIndex << 9;                              // shift in the averages to register//
-  writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
-} // of method setAveraging()                                                 //                                  //
-/*******************************************************************************************************************
-** Method setBusConversion specifies the conversion rate (see datasheet for 8 distinct values) for the bus        **
-*******************************************************************************************************************/
-void INA226_Class::setBusConversion(uint8_t convTime ) {                      // Set timing for Bus conversions   //
-  if (convTime>7) convTime=7;                                                 // Use maximum value allowed        //
-  int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
-  configRegister &= ~INA_CONFIG_BUS_TIME_MASK;                                // zero out the Bus conversion part //
-  configRegister |= (uint16_t)convTime << 6;                                  // shift in the averages to register//
-  writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
-} // of method setBusConversion()                                             //                                  //
-/*******************************************************************************************************************
-** Method setShuntConversion specifies the conversion rate (see datasheet for 8 distinct values) for the shunt    **
-*******************************************************************************************************************/
-void INA226_Class::setShuntConversion(uint8_t convTime ) {                    // Set timing for Bus conversions   //
-  if (convTime>7) convTime=7;                                                 // Use maximum value allowed        //
-  int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
-  configRegister &= ~INA_CONFIG_SHUNT_TIME_MASK;                              // zero out the Bus conversion part //
-  configRegister |= (uint16_t)convTime << 3;                                  // shift in the averages to register//
-  writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
-} // of method setShuntConversion()                                           //                                  //
-/*******************************************************************************************************************
-** Method waitForConversion loops until the current conversion is marked as finished. If the conversion has       **
-** completed already then the flag (and interrupt pin, if activated) is also reset.                               **
-*******************************************************************************************************************/
-void INA226_Class::waitForConversion() {                                      // Wait for current conversion      //
-  uint16_t conversionBits = 0;                                                //                                  //
-  while(conversionBits==0) {                                                  //                                  //
-    conversionBits = readWord(INA_MASK_ENABLE_REGISTER)&(uint16_t)8;          //                                  //
-  } // of while the conversion hasn't finished                                //                                  //
-} // of method waitForConversion()                                            //                                  //
-/*******************************************************************************************************************
-** Method setAlertPinOnConversion configure the INA226 to pull the ALERT pin low when a conversion is complete    **
-*******************************************************************************************************************/
-void INA226_Class::setAlertPinOnConversion(const bool alertState) {           // Enable pin change on conversion  //
-  uint16_t alertRegister = readWord(INA_MASK_ENABLE_REGISTER);                // Get the current register         //
-  if (!alertState) alertRegister &= ~((uint16_t)1<<10);                       // zero out the alert bit           //
-              else alertRegister |= (uint16_t)(1<<10);                        // turn on the alert bit            //
-  writeWord(INA_MASK_ENABLE_REGISTER,alertRegister);                          // Write register back to device    //
-} // of method setAlertPinOnConversion                                        //                                  //
-/*******************************************************************************************************************
 ** Method reset resets the INA226 using the first bit in the configuration register                               **
 *******************************************************************************************************************/
-void INA226_Class::reset() {                                                  // Reset the INA226                 //
-  writeWord(INA_CONFIGURATION_REGISTER,0x8000);                               // Set most significant bit         //
-  delay(I2C_DELAY);                                                           // Let the INA226 reboot            //
+void INA226_Class::reset(const uint8_t deviceNumber) {                        // Reset the INA226                 //
+  inaDet ina;                                                                 // Hold device details in structure //
+  int16_t configRegister;                                                     // Hold configuration register      //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      EEPROM.get(i*sizeof(ina),ina);                                          // Read EEPROM values               //
+      writeWord(INA_CONFIGURATION_REGISTER,0x8000,ina.address);               // Set most significant bit         //
+      delay(I2C_DELAY);                                                       // Let the INA226 reboot            //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
 } // of method reset                                                          //                                  //
 /*******************************************************************************************************************
 ** Method setMode allows the various mode combinations to be set. If no parameter is given the system goes back   **
 ** to the default startup mode.                                                                                   **
 *******************************************************************************************************************/
-void INA226_Class::setMode(uint8_t mode ) {                                   // Set the monitoring mode          //
-  int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER);              // Get the current register         //
-  configRegister &= ~INA_CONFIG_MODE_MASK;                                    // zero out the mode bits           //
-  mode = B00001111 & mode;                                                    // Mask off unused bits             //
-  configRegister |= mode;                                                     // shift in the mode settings       //
-  writeWord(INA_CONFIGURATION_REGISTER,configRegister);                       // Save new value                   //
-  _OperatingMode = mode;                                                      // Save the operating mode          //
+void INA226_Class::setMode(const uint8_t mode,const uint8_t deviceNumber ) {  // Set the monitoring mode          //
+  inaDet ina;                                                                 // Hold device details in structure //
+  int16_t configRegister;                                                     // Hold configuration register      //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      EEPROM.get(i*sizeof(ina),ina);                                          // Read EEPROM values               //
+      configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
+      configRegister &= ~INA_CONFIG_MODE_MASK;                                // zero out the mode bits           //
+      ina.operatingMode = B00001111 & mode;                                   // Mask off unused bits             //
+      EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);             // Write new EEPROM values          //
+      configRegister |= ina.operatingMode;                                    // shift in the mode settings       //
+      writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);       // Save new value                   //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
 } // of method setMode()                                                      //                                  //
+/*******************************************************************************************************************
+** Method setAveraging sets the hardware averaging for the different devices                                      **
+*******************************************************************************************************************/
+void INA226_Class::setAveraging(const uint16_t averages,                      // Set the number of averages taken //
+                                const uint8_t deviceNumber ) {                //                                  //
+  uint8_t averageIndex;                                                       // Store indexed value for register //
+  int16_t configRegister;                                                     // Configuration register contents  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
+      if      (averages>=1024) averageIndex = 7;                              // setting depending upon range     //
+      else if (averages>= 512) averageIndex = 6;                              //                                  //
+      else if (averages>= 256) averageIndex = 5;                              //                                  //
+      else if (averages>= 128) averageIndex = 4;                              //                                  //
+      else if (averages>=  64) averageIndex = 3;                              //                                  //
+      else if (averages>=  16) averageIndex = 2;                              //                                  //
+      else if (averages>=   4) averageIndex = 1;                              //                                  //
+      else                     averageIndex = 0;                              //                                  //
+      configRegister &= ~INA_CONFIG_AVG_MASK;                                 // zero out the averages part       //
+      configRegister |= (uint16_t)averageIndex << 9;                          // shift in the averages to register//
+      writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);       // Save new value                   //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
+} // of method setAveraging()                                                 //                                  //
+/*******************************************************************************************************************
+** Method setBusConversion specifies the conversion rate (see datasheet for 8 distinct values) for the bus        **
+*******************************************************************************************************************/
+void INA226_Class::setBusConversion(uint8_t convTime,                         // Set timing for Bus conversions   //
+                                    const uint8_t deviceNumber ) {            //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  int16_t configRegister;                                                     // Store configuration register     //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      if (convTime>7) convTime=7;                                             // Use maximum value allowed        //
+      configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
+      configRegister &= ~INA_CONFIG_BUS_TIME_MASK;                            // zero out the Bus conversion part //
+      configRegister |= (uint16_t)convTime << 6;                              // shift in the averages to register//
+      writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);       // Save new value                   //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
+} // of method setBusConversion()                                             //                                  //
+/*******************************************************************************************************************
+** Method setShuntConversion specifies the conversion rate (see datasheet for 8 distinct values) for the shunt    **
+*******************************************************************************************************************/
+void INA226_Class::setShuntConversion(uint8_t convTime,                       // Set timing for Bus conversions   //
+                                      const uint8_t deviceNumber ) {          //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  int16_t configRegister;                                                     // Store configuration register     //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      if (convTime>7) convTime=7;                                             // Use maximum value allowed        //
+      configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
+      configRegister &= ~INA_CONFIG_SHUNT_TIME_MASK;                          // zero out the Bus conversion part //
+      configRegister |= (uint16_t)convTime << 3;                              // shift in the averages to register//
+      writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);       // Save new value                   //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
+} // of method setShuntConversion()                                           //                                  //
+/*******************************************************************************************************************
+** Method waitForConversion loops until the current conversion is marked as finished. If the conversion has       **
+** completed already then the flag (and interrupt pin, if activated) is also reset.                               **
+*******************************************************************************************************************/
+void INA226_Class::waitForConversion(const uint8_t deviceNumber) {            // Wait for current conversion      //
+  uint16_t conversionBits = 0;                                                //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      conversionBits = 0;                                                     //                                  //
+      while(conversionBits==0) {                                              //                                  //
+        conversionBits = readWord(INA_MASK_ENABLE_REGISTER,ina.address)       //                                  //
+                         &(uint16_t)8;                                        //                                  //
+      } // of while the conversion hasn't finished                            //                                  //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
+} // of method waitForConversion()                                            //                                  //
+/*******************************************************************************************************************
+** Method setAlertPinOnConversion configure the INA226 to pull the ALERT pin low when a conversion is complete    **
+*******************************************************************************************************************/
+void INA226_Class::setAlertPinOnConversion(const bool alertState,             // Enable pin change on conversion  //
+                                           const uint8_t deviceNumber ) {     //                                  //
+  inaDet ina;                                                                 // Hold device details in structure //
+  uint16_t alertRegister;                                                     // Hold the alert register          //
+  for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
+    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+      alertRegister = readWord(INA_MASK_ENABLE_REGISTER,ina.address);         // Get the current register         //
+      if (!alertState) alertRegister &= ~((uint16_t)1<<10);                   // zero out the alert bit           //
+                  else alertRegister |= (uint16_t)(1<<10);                    // turn on the alert bit            //
+      writeWord(INA_MASK_ENABLE_REGISTER,alertRegister,ina.address);          // Write register back to device    //
+    } // of if this device needs to be set                                    //                                  //
+  } // for-next each device loop                                              //                                  //
+} // of method setAlertPinOnConversion                                        //                                  //

@@ -41,6 +41,7 @@ const uint32_t SERIAL_SPEED          = 115200;                                //
 ** Declare global variables and instantiate classes                                                               **
 *******************************************************************************************************************/
 INA226_Class INA226;                                                          // INA class instantiation          //
+uint8_t devicesFound = 0;                                                     // Number of INA226s found          //
 /*******************************************************************************************************************
 ** Declare prototypes for all functions used                                                                      **
 *******************************************************************************************************************/
@@ -58,10 +59,13 @@ void setup() {                                                                //
   #endif                                                                      // interface to initialize          //
   Serial.print(F("\n\nDisplay INA226 Readings V1.0.1\n"));                    // Display program information      //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor      //
-  INA226.begin(1,100000);                                                     //                                  //
+  devicesFound = INA226.begin(1,100000);                                      // All devices set to same values   //
+  Serial.print(F("Detected "));                                               //                                  //
+  Serial.print(devicesFound);                                                 //                                  //
+  Serial.println(F(" INA226 devices on I2C bus"));                            //                                  //
   INA226.setAveraging(4);                                                     // Average each reading n-times     //
-  INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
-  INA226.setShuntConversion();                                                // Maximum conversion time 8.244ms  //
+  INA226.setBusConversion(7);                                                 // Maximum conversion time 8.244ms  //
+  INA226.setShuntConversion(7);                                               // Maximum conversion time 8.244ms  //
   INA226.setMode(INA_MODE_CONTINUOUS_BOTH);                                   // Bus/shunt measured continuously  //
 } // of method setup()                                                        //                                  //
 /*******************************************************************************************************************
@@ -76,7 +80,7 @@ void loop() {                                                                 //
   Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);                  // Convert to millivolts            //
   Serial.println(F("mV"));                                                    //                                  //
   Serial.print(F("Bus amperage:  "));                                         //                                  //
-  Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                     // Convert to milliamps             //
+  Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                     // Convert to milliamp              //
   Serial.println(F("mA"));                                                    //                                  //
   Serial.print(F("Bus wattage:   "));                                         //                                  //
   Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                    // Convert to milliwatts            //
