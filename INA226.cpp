@@ -15,30 +15,7 @@
 #include "INA226.h"                                                           // Include the header definition    //
 #include <Wire.h>                                                             // I2C Library definition           //
 #include <EEPROM.h>                                                           // Include the EEPROM library       //
-
-/*******************************************************************************************************************
-** Class constructor takes no parameters, but searches the I2C bus to see how many of the 16 possible INA226s are **
-** found and allocates sufficient memory to store all data about them.                                            **
-*******************************************************************************************************************/
-INA226_Class::INA226_Class() {                                                // Class constructor                //
-  inaDet ina;                                                                 // Hold device details in structure //
-  Wire.begin();                                                               // Start the I2C wire subsystem     //
-  for(uint8_t deviceAddress = 1;deviceAddress<127;deviceAddress++) {          // Loop for each possible address   //
-    Wire.beginTransmission(deviceAddress);                                    // See if something is at address   //
-    if (Wire.endTransmission() == 0) {                                        // by checking the return error     //
-      writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE);                 // Force INAs to reset              //
-      delay(I2C_DELAY);                                                       // Wait for INA to finish resetting //
-      if (readWord(INA_CONFIGURATION_REGISTER)==INA_DEFAULT_CONFIGURATION) {  // Yes, we've found an INA226!      //
-        ina.address       = deviceAddress;                                    // Store device address             //
-        ina.operatingMode = B111;                                             // Default to continuous mode       //
-        if (_DeviceCount*sizeof(ina)<EEPROM.length()) {                       // If there's space left in EEPROM  //
-          EEPROM.put(_DeviceCount*sizeof(ina),ina);                           // Add the structure                //
-          _DeviceCount++;                                                     // Increment the device counter     //
-        } // of if-then the values will fit into EEPROM                       //                                  //
-      } // of if-then we have identified a INA226                             //                                  //
-    } // of if-then we have found a live device                               //                                  //
-  } // for-next each possible I2C address                                     //                                  //
-} // of class constructor                                                     //                                  //
+INA226_Class::INA226_Class()  {}                                              // Class constructor                //
 INA226_Class::~INA226_Class() {}                                              // Unused class destructor          //
 /*******************************************************************************************************************
 ** Method begin() sets the INA226 Configuration details, without which meaningful readings cannot be made. If it  **
@@ -46,10 +23,29 @@ INA226_Class::~INA226_Class() {}                                              //
 ** just that specific device is targeted.                                                                         **
 *******************************************************************************************************************/
 uint8_t INA226_Class::begin(const uint8_t maxBusAmps,                         // Class initializer                //
-                            const uint32_t microOhmR,                         //                                  // 
+                            const uint32_t microOhmR,                         //                                  //
                             const uint8_t deviceNumber ) {                    //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
-  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  if (_DeviceCount==0) {                                                      // Enumerate devices in first call  //
+    Wire.begin();                                                             // Start the I2C wire subsystem     //
+    for(uint8_t deviceAddress = 1;deviceAddress<127;deviceAddress++) {        // Loop for each possible address   //
+      Wire.beginTransmission(deviceAddress);                                  // See if something is at address   //
+      if (Wire.endTransmission() == 0) {                                      // by checking the return error     //
+        writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE,deviceAddress); // Force INAs to reset              //
+        delay(I2C_DELAY);                                                     // Wait for INA to finish resetting //
+        if (readWord(INA_CONFIGURATION_REGISTER,deviceAddress)                // Yes, we've found an INA226!      //
+            ==INA_DEFAULT_CONFIGURATION) {                                    //                                  //
+          ina.address       = deviceAddress;                                  // Store device address             //
+          ina.operatingMode = B111;                                           // Default to continuous mode       //
+          if ((_DeviceCount*sizeof(ina))<EEPROM.length()) {                   // If there's space left in EEPROM  //
+            EEPROM.put(_DeviceCount*sizeof(ina),ina);                         // Add the structure                //
+            _DeviceCount++;                                                   // Increment the device counter     //
+          } // of if-then the values will fit into EEPROM                     //                                  //
+        } // of if-then we have identified a INA226                           //                                  //
+      } // of if-then we have found a live device                             //                                  //
+    } // for-next each possible I2C address                                   //                                  //
+  } // of if-then first call with no devices found                            //                                  //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values for device    //
   ina.current_LSB = (uint64_t)maxBusAmps*1000000000/32767;                    // Get the best possible LSB in nA  //
   ina.calibration = (uint64_t)51200000 / ((uint64_t)ina.current_LSB *         // Compute calibration register     //
                     (uint64_t)microOhmR / (uint64_t)100000);                  // using 64 bit numbers throughout  //
@@ -60,7 +56,7 @@ uint8_t INA226_Class::begin(const uint8_t maxBusAmps,                         //
       writeWord(INA_CALIBRATION_REGISTER,ina.calibration,ina.address);        // Write the calibration value      //
     } // of for each device                                                   //                                  //
   } else {                                                                    //                                  //
-    EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);               // Write struct, cater for overflow //
+    EEPROM.put((deviceNumber%_DeviceCount)*sizeof(ina),ina);                  // Write struct, cater for overflow //
     writeWord(INA_CALIBRATION_REGISTER,ina.calibration,ina.address);          // Write the calibration value      //
   } // of if-then-else set one or all devices                                 //                                  //
   return _DeviceCount;                                                        // Return number of devices found   //
@@ -118,7 +114,7 @@ void INA226_Class::writeWord(const uint8_t addr, const uint16_t data,         //
 uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch,                //                                  //
                                         const uint8_t deviceNumber) {         //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
-  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   uint16_t busVoltage = readWord(INA_BUS_VOLTAGE_REGISTER,ina.address);       // Get the raw value and apply      //
   busVoltage = (uint32_t)busVoltage*INA_BUS_VOLTAGE_LSB/100;                  // conversion to get milliVolts     //
@@ -134,7 +130,7 @@ uint16_t INA226_Class::getBusMilliVolts(const bool waitSwitch,                //
 int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch,               //                                  //
                                          const uint8_t deviceNumber) {        //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
-  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER,ina.address);    // Get the raw value                //
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
@@ -149,7 +145,7 @@ int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch,               //
 *******************************************************************************************************************/
 int32_t INA226_Class::getBusMicroAmps(const uint8_t deviceNumber) {           //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
-  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   int32_t microAmps = readWord(INA_CURRENT_REGISTER,ina.address);             // Get the raw value                //
           microAmps = (int64_t)microAmps*ina.current_LSB/1000;                // Convert to microamps             //
   return(microAmps);                                                          // return computed microamps        //
@@ -159,7 +155,7 @@ int32_t INA226_Class::getBusMicroAmps(const uint8_t deviceNumber) {           //
 *******************************************************************************************************************/
 int32_t INA226_Class::getBusMicroWatts(const uint8_t deviceNumber) {          //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
-  EEPROM.get((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);                 // Read EEPROM values               //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   int32_t microWatts = readWord(INA_POWER_REGISTER,ina.address);              // Get the raw value                //
           microWatts = (int64_t)microWatts*ina.power_LSB/1000;                // Convert to milliwatts            //
   return(microWatts);                                                         // return computed milliwatts       //
@@ -171,7 +167,7 @@ void INA226_Class::reset(const uint8_t deviceNumber) {                        //
   inaDet ina;                                                                 // Hold device details in structure //
   int16_t configRegister;                                                     // Hold configuration register      //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       EEPROM.get(i*sizeof(ina),ina);                                          // Read EEPROM values               //
       writeWord(INA_CONFIGURATION_REGISTER,0x8000,ina.address);               // Set most significant bit         //
       delay(I2C_DELAY);                                                       // Let the INA226 reboot            //
@@ -186,12 +182,12 @@ void INA226_Class::setMode(const uint8_t mode,const uint8_t deviceNumber ) {  //
   inaDet ina;                                                                 // Hold device details in structure //
   int16_t configRegister;                                                     // Hold configuration register      //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       EEPROM.get(i*sizeof(ina),ina);                                          // Read EEPROM values               //
       configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
       configRegister &= ~INA_CONFIG_MODE_MASK;                                // zero out the mode bits           //
       ina.operatingMode = B00001111 & mode;                                   // Mask off unused bits             //
-      EEPROM.put((deviceNumber%INA_MAX_DEVICES)*sizeof(ina),ina);             // Write new EEPROM values          //
+      EEPROM.put((deviceNumber%_DeviceCount)*sizeof(ina),ina);                // Write new EEPROM values          //
       configRegister |= ina.operatingMode;                                    // shift in the mode settings       //
       writeWord(INA_CONFIGURATION_REGISTER,configRegister,ina.address);       // Save new value                   //
     } // of if this device needs to be set                                    //                                  //
@@ -206,7 +202,7 @@ void INA226_Class::setAveraging(const uint16_t averages,                      //
   int16_t configRegister;                                                     // Configuration register contents  //
   inaDet ina;                                                                 // Hold device details in structure //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
       if      (averages>=1024) averageIndex = 7;                              // setting depending upon range     //
       else if (averages>= 512) averageIndex = 6;                              //                                  //
@@ -230,7 +226,7 @@ void INA226_Class::setBusConversion(uint8_t convTime,                         //
   inaDet ina;                                                                 // Hold device details in structure //
   int16_t configRegister;                                                     // Store configuration register     //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       if (convTime>7) convTime=7;                                             // Use maximum value allowed        //
       configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
       configRegister &= ~INA_CONFIG_BUS_TIME_MASK;                            // zero out the Bus conversion part //
@@ -247,7 +243,7 @@ void INA226_Class::setShuntConversion(uint8_t convTime,                       //
   inaDet ina;                                                                 // Hold device details in structure //
   int16_t configRegister;                                                     // Store configuration register     //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       if (convTime>7) convTime=7;                                             // Use maximum value allowed        //
       configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
       configRegister &= ~INA_CONFIG_SHUNT_TIME_MASK;                          // zero out the Bus conversion part //
@@ -264,7 +260,7 @@ void INA226_Class::waitForConversion(const uint8_t deviceNumber) {            //
   uint16_t conversionBits = 0;                                                //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       conversionBits = 0;                                                     //                                  //
       while(conversionBits==0) {                                              //                                  //
         conversionBits = readWord(INA_MASK_ENABLE_REGISTER,ina.address)       //                                  //
@@ -281,7 +277,7 @@ void INA226_Class::setAlertPinOnConversion(const bool alertState,             //
   inaDet ina;                                                                 // Hold device details in structure //
   uint16_t alertRegister;                                                     // Hold the alert register          //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
-    if(deviceNumber==UINT8_MAX || deviceNumber%INA_MAX_DEVICES==i ) {         // If this device needs setting     //
+    if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       alertRegister = readWord(INA_MASK_ENABLE_REGISTER,ina.address);         // Get the current register         //
       if (!alertState) alertRegister &= ~((uint16_t)1<<10);                   // zero out the alert bit           //
                   else alertRegister |= (uint16_t)(1<<10);                    // turn on the alert bit            //

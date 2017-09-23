@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.5b 2017-09-23 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.5a 2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.4  2017-08-13 https://github.com/SV-Zanshin Enhancement #5, removed while() loop after Wire.requestFrom()  **
 ** 1.0.3  2017-08-09 https://github.com/SV-Zanshin Fix https://github.com/SV-Zanshin/INA226/issues/4. Overflows   **
@@ -58,12 +59,10 @@
     uint32_t power_LSB;                                                       // Wattage LSB                      //
     uint8_t  operatingMode;                                                   // Default continuous mode operation//
   } inaDet; // of structure                                                   //                                  //
-
   /*****************************************************************************************************************
   ** Declare constants used in the class                                                                          **
   *****************************************************************************************************************/
   const uint8_t  I2C_DELAY                    =     10;                       // Microsecond delay on write       //
-  const uint8_t  INA_MAX_DEVICES              =     16;                       // Maximum number of INA226 devices //
   const uint8_t  INA_CONFIGURATION_REGISTER   =      0;                       // Registers common to all INAs     //
   const uint8_t  INA_SHUNT_VOLTAGE_REGISTER   =      1;                       //                                  //
   const uint8_t  INA_BUS_VOLTAGE_REGISTER     =      2;                       //                                  //
@@ -115,12 +114,12 @@
       void     setAlertPinOnConversion(const bool alertState,                 // Enable pin change on conversion  //
                                        const uint8_t deviceNumber=UINT8_MAX); //                                  //
     private:                                                                  // Private variables and methods    //
-      uint8_t  readByte(const uint8_t addr,const uint8_t deviceAddress=0);    // Read a byte from an I2C address  //
-      int16_t  readWord(const uint8_t addr,const uint8_t deviceAddress=0);    // Read a word from an I2C address  //
+      uint8_t  readByte(const uint8_t addr, const uint8_t deviceAddress);     // Read a byte from an I2C address  //
+      int16_t  readWord(const uint8_t addr, const uint8_t deviceAddress);     // Read a word from an I2C address  //
       void     writeByte(const uint8_t addr, const uint8_t data,              // Write a byte to an I2C address   //
-                         const uint8_t deviceAddress=0);                      //                                  //
+                         const uint8_t deviceAddress);                        //                                  //
       void     writeWord(const uint8_t addr, const uint16_t data,             // Write two bytes to an I2C address//
-                         const uint8_t deviceAddress=0);                      //                                  //
+                         const uint8_t deviceAddress);                        //                                  //
       uint8_t  _TransmissionStatus = 0;                                       // Return code for I2C transmission //
       uint8_t  _DeviceCount        = 0;                                       // Number of INA226s detected       //
   }; // of INA226_Class definition                                            //                                  //

@@ -11,6 +11,13 @@
 ** only to convert and display the data conveniently. The INA226 uses 15 bits of precision, and even though the   **
 ** current and watt information is returned using 32-bit integers the precision remains the same.                 **
 **                                                                                                                **
+** As of version 1.0.3 the library supports multiple INA226 devices.  The Atmel's EEPROM is used to store the 96  **
+** bytes of static information per device using https://www.arduino.cc/en/Reference/EEPROM function calls.        **
+** Although up to 16 devices could theoretically be present on the I2C bus the actual limit is determined by the  **
+** available EEPROM - ATmega328 UNO has 1024k so can support up to 10 devices but the ATmega168 only has 512 bytes**
+** which limits it to supporting at most 5 INA226s.  The library has been modified to be backwards compatible and **
+** the device number (from 0 to number of devices found) is passed as the last parameter.                         **
+**                                                                                                                **
 ** The datasheet for the INA226 can be found at http://www.ti.com/lit/ds/symlink/ina226.pdf and it contains the   **
 ** information required in order to hook up the device. Unfortunately it comes as a VSSOP package but it can be   **
 ** soldered onto a breakout board for breadboard use. The INA226 is quite similar to the INA219 mentioned above,  **
@@ -27,9 +34,10 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
-** 1.0.2   2017-08-09 https://github.com/SV-Zanshin Cosmetic changes                                              **
-** 1.0.1   2017-01-12 https://github.com/SV-Zanshin Minor code cleanup and added more comments                    **
-** 1.0.0   2017-01-09 https://github.com/SV-Zanshin Cloned example from test program suite                        **
+** 1.0.3  2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6 Multiple INA226s **
+** 1.0.2  2017-08-09 https://github.com/SV-Zanshin Cosmetic changes                                               **
+** 1.0.1  2017-01-12 https://github.com/SV-Zanshin Minor code cleanup and added more comments                     **
+** 1.0.0  2017-01-09 https://github.com/SV-Zanshin Cloned example from test program suite                         **
 **                                                                                                                **
 *******************************************************************************************************************/
 #include <INA226.h>                                                           // INA226 Library                   //
@@ -57,9 +65,10 @@ void setup() {                                                                //
   #ifdef  __AVR_ATmega32U4__                                                  // If we are a 32U4 processor, then //
     delay(2000);                                                              // wait 2 seconds for the serial    //
   #endif                                                                      // interface to initialize          //
-  Serial.print(F("\n\nDisplay INA226 Readings V1.0.1\n"));                    // Display program information      //
-  // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor      //
-  devicesFound = INA226.begin(1,100000);                                      // All devices set to same values   //
+  Serial.print(F("\n\nDisplay INA226 Readings V1.0.3\n"));                    // Display program information      //
+  // The begin initializes the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor, and //
+  // since no specific device is given as the 3rd parameter all devices are initially set to these values         //
+  devicesFound = INA226.begin(1,100000);                                      // Set expected Amps and resistor   //
   Serial.print(F("Detected "));                                               //                                  //
   Serial.print(devicesFound);                                                 //                                  //
   Serial.println(F(" INA226 devices on I2C bus"));                            //                                  //
@@ -73,18 +82,25 @@ void setup() {                                                                //
 ** run in a simple infinite loop                                                                                  **
 *******************************************************************************************************************/
 void loop() {                                                                 // Main program loop                //
-  Serial.print(F("Bus voltage:   "));                                         //                                  //
-  Serial.print((float)INA226.getBusMilliVolts()/1000.0,4);                    // Convert to millivolts            //
-  Serial.println(F("V"));                                                     //                                  //
-  Serial.print(F("Shunt voltage: "));                                         //                                  //
-  Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);                  // Convert to millivolts            //
-  Serial.println(F("mV"));                                                    //                                  //
-  Serial.print(F("Bus amperage:  "));                                         //                                  //
-  Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                     // Convert to milliamp              //
-  Serial.println(F("mA"));                                                    //                                  //
-  Serial.print(F("Bus wattage:   "));                                         //                                  //
-  Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                    // Convert to milliwatts            //
-  Serial.println(F("mW"));                                                    //                                  //
-  Serial.println();                                                           //                                  //
+  for (uint8_t i=0;i<devicesFound;i++) {                                      // Loop through all devices found   //
+    Serial.print(F("Bus voltage   "));                                        //                                  //
+    Serial.print(i+1);                                                        //                                  //
+    Serial.print(F(": "));                                                    //                                  //
+    Serial.print((float)INA226.getBusMilliVolts()/1000.0,4);                  // Convert to millivolts            //
+    Serial.print(F("V\nShunt voltage "));                                     //                                  //
+    Serial.print(i+1);                                                        //                                  //
+    Serial.print(F(": "));                                                    //                                  //
+    Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);                // Convert to millivolts            //
+    Serial.print(F("mV\nBus amperage  "));                                    //                                  //
+    Serial.print(i+1);                                                        //                                  //
+    Serial.print(F(": "));                                                    //                                  //
+    Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                   // Convert to milliamp              //
+    Serial.print(F("mA\nBus wattage   "));                                    //                                  //
+    Serial.print(i+1);                                                        //                                  //
+    Serial.print(F(":  "));                                                   //                                  //
+    Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                  // Convert to milliwatts            //
+    Serial.println(F("mW"));                                                  //                                  //
+    Serial.println();                                                         //                                  //
+  } // of for-next each device loop                                           //                                  //  
   delay(5000);                                                                //                                  //
 } // of method loop                                                           //----------------------------------//
