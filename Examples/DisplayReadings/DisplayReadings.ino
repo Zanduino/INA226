@@ -101,6 +101,6 @@ void loop() {                                                                 //
     Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                  // Convert to milliwatts            //
     Serial.println(F("mW"));                                                  //                                  //
     Serial.println();                                                         //                                  //
-  } // of for-next each device loop                                           //                                  //  
+  } // of for-next each device loop                                           //                                  //
   delay(5000);                                                                //                                  //
 } // of method loop                                                           //----------------------------------//
