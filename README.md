@@ -10,6 +10,6 @@ The [datasheet](http://www.ti.com/lit/ds/symlink/ina226.pdf) has examples of how
 The library locates all INA226 devices on the I2C chain. Each unit can be individually configured with 4 setup parameters describing the expected voltage, shunt / resistor values which then set the internal configuration registers is ready to begin accurate measurements.  The details of how to setup the library along with all of the publicly available methods can be found on the [INA226 wiki pages](https://github.com/SV-Zanshin/INA226/wiki).
 Great lengths have been taken to avoid the use of floating point in the library. To keep the original level of precision without loss but to allow the full range of voltages and amperes to be returned the amperage results are returned as 32-bit integers.
 
-The INA226 has a dedicated interrupt pin which can be used to trigger pin-change interrupts on the Arduino and the examples show a program that measures readings using this output pin so that the Arduino can perform other concurrent tasks while still retrieving measurements.
+The INA226 has a dedicated interrupt pin which can be used to trigger pin-change interrupts on the Arduino and the examples contain a program that measures readings using this output pin so that the Arduino can perform other concurrent tasks while still retrieving measurements.
 
 ![Zanshin Logo](https://www.sv-zanshin.com/r/images/site/gif/zanshinkanjitiny.gif) <img src="https://www.sv-zanshin.com/r/images/site/gif/zanshintext.gif" width="75"/>
