@@ -38,6 +38,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.3   2017-09-29 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/8. Default values **
 ** 1.0.2   2017-08-10 https://github.com/SV-Zanshin Further changes to comments                                   **
 ** 1.0.1   2017-07-15 https://github.com/SV-Zanshin Cleaned up comments                                           **
 ** 1.0.0   2017-01-12 https://github.com/SV-Zanshin Created example                                               **
@@ -82,7 +83,7 @@ ISR (PCINT0_vect) {                                                           //
 void setup() {                                                                //                                  //
   pinMode(GREEN_LED_PIN, OUTPUT);                                             // Define the green LED as an output//
   digitalWrite(GREEN_LED_PIN,true);                                           // Turn on the LED                  //
-   pinMode(INA226_ALERT_PIN,INPUT_PULLUP);                                    // Declare pin with pullup resistors//
+  pinMode(INA226_ALERT_PIN,INPUT_PULLUP);                                     // Declare pin with pullup resistors//
   *digitalPinToPCMSK(INA226_ALERT_PIN)|=bit(digitalPinToPCMSKbit(INA226_ALERT_PIN)); // Enable PCMSK pin          //
   PCIFR  |= bit (digitalPinToPCICRbit(INA226_ALERT_PIN));                     // clear any outstanding interrupt  //
   PCICR  |= bit (digitalPinToPCICRbit(INA226_ALERT_PIN));                     // enable interrupt for the group   //
@@ -94,8 +95,8 @@ void setup() {                                                                //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ω resistor        //
   INA226.begin(1,100000);                                                     //                                  //
   INA226.setAveraging(64);                                                    // Average each reading n-times     //
-  INA226.setBusConversion();                                                  // Maximum conversion time 8.244ms  //
-  INA226.setShuntConversion();                                                // Maximum conversion time 8.244ms  //
+  INA226.setBusConversion(7);                                                 // Maximum conversion time 8.244ms  //
+  INA226.setShuntConversion(7);                                               // Maximum conversion time 8.244ms  //
   INA226.setMode(INA_MODE_CONTINUOUS_BOTH);                                   // Bus/shunt measured continuously  //
   INA226.setAlertPinOnConversion(true);                                       // Make alert pin go low on finish  //
 } // of method setup()                                                        //                                  //
