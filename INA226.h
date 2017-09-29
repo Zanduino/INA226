@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.5  2017-09-24 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.5b 2017-09-23 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.5a 2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.4  2017-08-13 https://github.com/SV-Zanshin Enhancement #5, removed while() loop after Wire.requestFrom()  **
