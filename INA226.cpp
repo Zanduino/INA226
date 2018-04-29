@@ -26,22 +26,25 @@ uint8_t INA226_Class::begin(const uint8_t maxBusAmps,                         //
                             const uint32_t microOhmR,                         //                                  //
                             const uint8_t deviceNumber ) {                    //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  uint16_t manufacturerId;                                                    // Read manufacturerId from device  //
   if (_DeviceCount==0) {                                                      // Enumerate devices in first call  //
     Wire.begin();                                                             // Start the I2C wire subsystem     //
-    for(uint8_t deviceAddress = 1;deviceAddress<127;deviceAddress++) {        // Loop for each possible address   //
+    for(uint8_t deviceAddress = 64;deviceAddress<79;deviceAddress++) {        // Loop for each possible address   //
       Wire.beginTransmission(deviceAddress);                                  // See if something is at address   //
       if (Wire.endTransmission() == 0) {                                      // by checking the return error     //
-        writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE,deviceAddress); // Force INAs to reset              //
-        delay(I2C_DELAY);                                                     // Wait for INA to finish resetting //
-        if (readWord(INA_CONFIGURATION_REGISTER,deviceAddress)                // Yes, we've found an INA226!      //
-            ==INA_DEFAULT_CONFIGURATION) {                                    //                                  //
-          ina.address       = deviceAddress;                                  // Store device address             //
-          ina.operatingMode = B111;                                           // Default to continuous mode       //
-          if ((_DeviceCount*sizeof(ina))<EEPROM.length()) {                   // If there's space left in EEPROM  //
-            EEPROM.put(_DeviceCount*sizeof(ina),ina);                         // Add the structure                //
-            _DeviceCount++;                                                   // Increment the device counter     //
-          } // of if-then the values will fit into EEPROM                     //                                  //
-        } // of if-then we have identified a INA226                           //                                  //
+        if (readWord(INA_MANUFACTURER_ID_REGISTER,deviceAddress)==0x5449) {   // Check hard-coded manufacturerId  //
+          writeWord(INA_CONFIGURATION_REGISTER,INA_RESET_DEVICE,deviceAddress);// Force INAs to reset             //
+          delay(I2C_DELAY);                                                   // Wait for INA to finish resetting //
+          if (readWord(INA_CONFIGURATION_REGISTER,deviceAddress)              // Yes, we've found an INA226!      //
+              ==INA_DEFAULT_CONFIGURATION) {                                  //                                  //
+            ina.address       = deviceAddress;                                // Store device address             //
+            ina.operatingMode = B111;                                         // Default to continuous mode       //
+            if ((_DeviceCount*sizeof(ina))<EEPROM.length()) {                 // If there's space left in EEPROM  //
+              EEPROM.put(_DeviceCount*sizeof(ina),ina);                       // Add the structure                //
+              _DeviceCount++;                                                 // Increment the device counter     //
+            } // of if-then the values will fit into EEPROM                   //                                  //
+          } // of if-then we have identified a INA226                         //                                  //
+        } // of if-then we have identified a INA226 manufacturer code         //                                  //
       } // of if-then we have found a live device                             //                                  //
     } // for-next each possible I2C address                                   //                                  //
   } // of if-then first call with no devices found                            //                                  //

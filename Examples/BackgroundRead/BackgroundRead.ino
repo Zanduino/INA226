@@ -38,6 +38,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.4   2018-05-29 https://github.com/SV-Zanshin Added checking if the device is actually detected to code     **
 ** 1.0.3   2017-09-29 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/8. Default values **
 ** 1.0.2   2017-08-10 https://github.com/SV-Zanshin Further changes to comments                                   **
 ** 1.0.1   2017-07-15 https://github.com/SV-Zanshin Cleaned up comments                                           **
@@ -93,7 +94,10 @@ void setup() {                                                                //
   #endif                                                                      // interface to initialize          //
   Serial.print(F("\n\nBackground INA226 Read V1.0.0\n"));                     // Display program information      //
   // The begin initialized the calibration for an expected ±1 Amps maximum current and for a 0.1Ω resistor        //
-  INA226.begin(1,100000);                                                     //                                  //
+  while (INA226.begin(1,100000)==0) {                                         //                                  //
+    Serial.print(F("No Device detected. Sleeping 10 seconds.\n"));            //                                  //
+	delay(10000);                                                             //                                  //
+  } // of if-then no device found                                             //                                  //
   INA226.setAveraging(64);                                                    // Average each reading n-times     //
   INA226.setBusConversion(7);                                                 // Maximum conversion time 8.244ms  //
   INA226.setShuntConversion(7);                                               // Maximum conversion time 8.244ms  //

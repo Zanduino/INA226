@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.6  2018-05-29 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/10. Limit Scan addr**
 ** 1.0.5b 2017-09-23 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.5a 2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.4  2017-08-13 https://github.com/SV-Zanshin Enhancement #5, removed while() loop after Wire.requestFrom()  **
@@ -70,6 +71,7 @@
   const uint8_t  INA_CURRENT_REGISTER         =      4;                       //                                  //
   const uint8_t  INA_CALIBRATION_REGISTER     =      5;                       //                                  //
   const uint8_t  INA_MASK_ENABLE_REGISTER     =      6;                       //                                  //
+  const uint8_t  INA_MANUFACTURER_ID_REGISTER =   0xFE;                       //                                  //
   const uint16_t INA_RESET_DEVICE             = 0x8000;                       // Write to configuration to reset  //
   const uint16_t INA_DEFAULT_CONFIGURATION    = 0x4127;                       // Default configuration register   //
   const uint16_t INA_BUS_VOLTAGE_LSB          =    125;                       // LSB in uV *100 1.25mV            //
