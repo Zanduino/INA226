@@ -182,8 +182,7 @@ void INA226_Class::reset(const uint8_t deviceNumber) {                        //
 *******************************************************************************************************************/
 uint8_t INA226_Class::getMode(const uint8_t deviceNumber ) {                  // Return the monitoring mode       //
   inaDet ina;                                                                 // Hold device details in structure //
-  uint8_t tempDevice = deviceNumber;                                          // Temporary device number storage  //
-  if(tempDevice==UINT8_MAX) tempDevice = 0;                                   // Default to first device          //
+  uint8_t tempDevice = deviceNumber+1;                                        // Temporary device number storage  //
   EEPROM.get(tempDevice*sizeof(ina),ina);                                     // Read EEPROM values               //
   return(ina.operatingMode);                                                  // Return stored value              //
 } // of method getMode()                                                      //                                  //
