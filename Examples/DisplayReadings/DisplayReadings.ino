@@ -34,6 +34,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.4  2018-06-01 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/11 Corrected loop  **
 ** 1.0.3  2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6 Multiple INA226s **
 ** 1.0.2  2017-08-09 https://github.com/SV-Zanshin Cosmetic changes                                               **
 ** 1.0.1  2017-01-12 https://github.com/SV-Zanshin Minor code cleanup and added more comments                     **
@@ -86,19 +87,19 @@ void loop() {                                                                 //
     Serial.print(F("Bus voltage   "));                                        //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(": "));                                                    //                                  //
-    Serial.print((float)INA226.getBusMilliVolts()/1000.0,4);                  // Convert to millivolts            //
+    Serial.print((float)INA226.getBusMilliVolts(true,i)/1000.0,4);            // Convert to millivolts            //
     Serial.print(F("V\nShunt voltage "));                                     //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(": "));                                                    //                                  //
-    Serial.print((float)INA226.getShuntMicroVolts()/1000.0,3);                // Convert to millivolts            //
+    Serial.print((float)INA226.getShuntMicroVolts(true,i)/1000.0,3);          // Convert to millivolts            //
     Serial.print(F("mV\nBus amperage  "));                                    //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(": "));                                                    //                                  //
-    Serial.print((float)INA226.getBusMicroAmps()/1000.0,3);                   // Convert to milliamp              //
+    Serial.print((float)INA226.getBusMicroAmps(i)/1000.0,3);                  // Convert to milliamp              //
     Serial.print(F("mA\nBus wattage   "));                                    //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(":  "));                                                   //                                  //
-    Serial.print((float)INA226.getBusMicroWatts()/1000.0,3);                  // Convert to milliwatts            //
+    Serial.print((float)INA226.getBusMicroWatts(i)/1000.0,3);                 // Convert to milliwatts            //
     Serial.println(F("mW"));                                                  //                                  //
     Serial.println();                                                         //                                  //
   } // of for-next each device loop                                           //                                  //
