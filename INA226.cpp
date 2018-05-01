@@ -178,6 +178,16 @@ void INA226_Class::reset(const uint8_t deviceNumber) {                        //
   } // for-next each device loop                                              //                                  //
 } // of method reset                                                          //                                  //
 /*******************************************************************************************************************
+** Method getMode returns the current monitoring mode of the device selected                                      **
+*******************************************************************************************************************/
+uint8_t INA226_Class::getMode(const uint8_t deviceNumber ) {                  // Return the monitoring mode       //
+  inaDet ina;                                                                 // Hold device details in structure //
+  uint8_t tempDevice = deviceNumber;                                          // Temporary device number storage  //
+  if(tempDevice==UINT8_MAX) tempDevice = 0;                                   // Default to first device          //
+  EEPROM.get(tempDevice*sizeof(ina),ina);                                     // Read EEPROM values               //
+  return(ina.operatingMode);                                                  // Return stored value              //
+} // of method getMode()                                                      //                                  //
+/*******************************************************************************************************************
 ** Method setMode allows the various mode combinations to be set. If no parameter is given the system goes back   **
 ** to the default startup mode.                                                                                   **
 *******************************************************************************************************************/
@@ -287,4 +297,4 @@ void INA226_Class::setAlertPinOnConversion(const bool alertState,             //
       writeWord(INA_MASK_ENABLE_REGISTER,alertRegister,ina.address);          // Write register back to device    //
     } // of if this device needs to be set                                    //                                  //
   } // for-next each device loop                                              //                                  //
-} // of method setAlertPinOnConversion                                        //                                  //
+} // of method setAlertPinOnConversion                                        //----------------------------------//

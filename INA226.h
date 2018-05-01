@@ -33,6 +33,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.6  2018-06-01 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/12. Add getMode()  **
 ** 1.0.6  2018-05-29 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/10. Limit Scan addr**
 ** 1.0.5  2017-09-24 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
 ** 1.0.5b 2017-09-23 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **
@@ -107,6 +108,7 @@
       int32_t  getBusMicroWatts(const uint8_t deviceNumber=0);                // Retrieve micro-watts             //
       void     reset(const uint8_t deviceNumber=0);                           // Reset the device                 //
       void     setMode(const uint8_t mode,const uint8_t devNumber=UINT8_MAX); // Set the monitoring mode          //
+      uint8_t  getMode(const uint8_t devNumber=UINT8_MAX);                    // Get the monitoring mode          //
       void     setAveraging(const uint16_t averages,                          // Set the number of averages taken //
                             const uint8_t deviceNumber=UINT8_MAX);            //                                  //
       void     setBusConversion(uint8_t convTime,                             // Set timing for Bus conversions   //
