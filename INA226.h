@@ -33,6 +33,8 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.7  2018-06-08 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/14. Missing calls  **
+**                                                 EEPROM.Get() for device number caused errors sporadic errors   **
 ** 1.0.6  2018-06-01 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/12. Add getMode()  **
 ** 1.0.6  2018-05-29 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/10. Limit Scan addr**
 ** 1.0.5  2017-09-24 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6. Multiple INA226 **

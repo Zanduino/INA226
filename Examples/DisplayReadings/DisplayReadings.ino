@@ -34,6 +34,7 @@
 **                                                                                                                **
 ** Vers.  Date       Developer                     Comments                                                       **
 ** ====== ========== ============================= ============================================================== **
+** 1.0.5  2018-06-08 https://github.com/SV-Zanshin removed unneeded prototype definitions                         **
 ** 1.0.4  2018-06-01 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/11 Corrected loop  **
 ** 1.0.3  2017-09-18 https://github.com/SV-Zanshin https://github.com/SV-Zanshin/INA226/issues/6 Multiple INA226s **
 ** 1.0.2  2017-08-09 https://github.com/SV-Zanshin Cosmetic changes                                               **
@@ -52,11 +53,6 @@ const uint32_t SERIAL_SPEED          = 115200;                                //
 INA226_Class INA226;                                                          // INA class instantiation          //
 uint8_t devicesFound = 0;                                                     // Number of INA226s found          //
 /*******************************************************************************************************************
-** Declare prototypes for all functions used                                                                      **
-*******************************************************************************************************************/
-void    setup();                                                              // Called once on power-up/restart  //
-void    loop();                                                               // Called repeatedly after setup()  //
-/*******************************************************************************************************************
 ** Method Setup(). This is an Arduino IDE method which is called first upon initial boot or restart. It is only   **
 ** called one time and all of the variables and other initialization calls are done here prior to entering the    **
 ** main loop for data measurement and storage.                                                                    **
@@ -66,10 +62,12 @@ void setup() {                                                                //
   #ifdef  __AVR_ATmega32U4__                                                  // If we are a 32U4 processor, then //
     delay(2000);                                                              // wait 2 seconds for the serial    //
   #endif                                                                      // interface to initialize          //
-  Serial.print(F("\n\nDisplay INA226 Readings V1.0.3\n"));                    // Display program information      //
+  Serial.print(F("\n\nDisplay INA226 Readings V1.0.5\n"));                    // Display program information      //
+  Serial.print(F(" - Searching & Initializing INA226\n"));                    // Display program information      //
   // The begin initializes the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor, and //
   // since no specific device is given as the 3rd parameter all devices are initially set to these values         //
-  devicesFound = INA226.begin(1,100000);                                      // Set expected Amps and resistor   //
+  devicesFound = INA226.begin(1,1960000);                                      // Set expected Amps and resistor   //
+//  devicesFound = INA226.begin(1,100000);                                      // Set expected Amps and resistor   //
   Serial.print(F("Detected "));                                               //                                  //
   Serial.print(devicesFound);                                                 //                                  //
   Serial.println(F(" INA226 devices on I2C bus"));                            //                                  //
@@ -95,13 +93,13 @@ void loop() {                                                                 //
     Serial.print(F("mV\nBus amperage  "));                                    //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(": "));                                                    //                                  //
-    Serial.print((float)INA226.getBusMicroAmps(i)/1000.0,3);                  // Convert to milliamp              //
+    Serial.print((float)INA226.getBusMicroAmps(i)/1000.0,4);                  // Convert to milliamp              //
     Serial.print(F("mA\nBus wattage   "));                                    //                                  //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(":  "));                                                   //                                  //
-    Serial.print((float)INA226.getBusMicroWatts(i)/1000.0,3);                 // Convert to milliwatts            //
+    Serial.print((float)INA226.getBusMicroWatts(i)/1000.0,4);                 // Convert to milliwatts            //
     Serial.println(F("mW"));                                                  //                                  //
     Serial.println();                                                         //                                  //
   } // of for-next each device loop                                           //                                  //
-  delay(5000);                                                                //                                  //
+  delay(1000);                                                                //                                  //
 } // of method loop                                                           //----------------------------------//

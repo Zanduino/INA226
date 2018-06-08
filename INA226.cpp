@@ -213,6 +213,7 @@ void INA226_Class::setAveraging(const uint16_t averages,                      //
   uint8_t averageIndex;                                                       // Store indexed value for register //
   int16_t configRegister;                                                     // Configuration register contents  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
     if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);      // Get the current register         //
@@ -236,6 +237,7 @@ void INA226_Class::setAveraging(const uint16_t averages,                      //
 void INA226_Class::setBusConversion(uint8_t convTime,                         // Set timing for Bus conversions   //
                                     const uint8_t deviceNumber ) {            //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   int16_t configRegister;                                                     // Store configuration register     //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
     if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
@@ -253,6 +255,7 @@ void INA226_Class::setBusConversion(uint8_t convTime,                         //
 void INA226_Class::setShuntConversion(uint8_t convTime,                       // Set timing for Bus conversions   //
                                       const uint8_t deviceNumber ) {          //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   int16_t configRegister;                                                     // Store configuration register     //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
     if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
@@ -271,6 +274,7 @@ void INA226_Class::setShuntConversion(uint8_t convTime,                       //
 void INA226_Class::waitForConversion(const uint8_t deviceNumber) {            // Wait for current conversion      //
   uint16_t conversionBits = 0;                                                //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
     if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
       conversionBits = 0;                                                     //                                  //
@@ -287,6 +291,7 @@ void INA226_Class::waitForConversion(const uint8_t deviceNumber) {            //
 void INA226_Class::setAlertPinOnConversion(const bool alertState,             // Enable pin change on conversion  //
                                            const uint8_t deviceNumber ) {     //                                  //
   inaDet ina;                                                                 // Hold device details in structure //
+  EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   uint16_t alertRegister;                                                     // Hold the alert register          //
   for(uint8_t i=0;i<_DeviceCount;i++) {                                       // Loop for each device found       //
     if(deviceNumber==UINT8_MAX || deviceNumber%_DeviceCount==i ) {            // If this device needs setting     //
