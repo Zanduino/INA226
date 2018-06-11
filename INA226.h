@@ -53,6 +53,7 @@
 *******************************************************************************************************************/
 #include "Arduino.h"                                                          // Arduino data type definitions    //
 #ifndef INA226_Class_h                                                        // Guard code definition            //
+  #define debug_Mode                                                          // Comment out when not needed      //
   #define INA226__Class_h                                                     // Define the name inside guard code//
   /*****************************************************************************************************************
   ** Declare structures used in the class                                                                         **

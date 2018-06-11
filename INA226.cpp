@@ -53,6 +53,11 @@ uint8_t INA226_Class::begin(const uint8_t maxBusAmps,                         //
   ina.calibration = (uint64_t)51200000 / ((uint64_t)ina.current_LSB *         // Compute calibration register     //
                     (uint64_t)microOhmR / (uint64_t)100000);                  // using 64 bit numbers throughout  //
   ina.power_LSB   = (uint32_t)25*ina.current_LSB;                             // Fixed multiplier for INA219      //
+  #ifdef debug_Mode                                                           // Display values when debugging    //
+  Serial.print(F("current_LSB = ")); Serial.println(ina.current_LSB);         //                                  //
+  Serial.print(F("calibration = ")); Serial.println(ina.calibration);         //                                  //
+  Serial.print(F("power_LSB   = ")); Serial.println(ina.power_LSB);           //                                  //
+  #endif                                                                      // end of conditional compile code  //
   if (deviceNumber==UINT8_MAX) {                                              // If default value, then set all   //
     for(uint8_t i=0;i<_DeviceCount;i++) {                                     // For each device write data       //
       EEPROM.put(i*sizeof(ina),ina);                                          // Write value to address           //
@@ -136,6 +141,7 @@ int16_t INA226_Class::getShuntMicroVolts(const bool waitSwitch,               //
   EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   if (waitSwitch) waitForConversion();                                        // wait for conversion to complete  //
   int32_t shuntVoltage = readWord(INA_SHUNT_VOLTAGE_REGISTER,ina.address);    // Get the raw value                //
+Serial.print("shuntVoltageRaw = ");Serial.println(shuntVoltage);
   shuntVoltage = shuntVoltage*INA_SHUNT_VOLTAGE_LSB/10;                       // Convert to microvolts            //
   if (!bitRead(ina.operatingMode,2) && bitRead(ina.operatingMode,0)) {        // If triggered and shunt active    //
     int16_t configRegister = readWord(INA_CONFIGURATION_REGISTER,ina.address);// Get the current register         //
@@ -150,7 +156,9 @@ int32_t INA226_Class::getBusMicroAmps(const uint8_t deviceNumber) {           //
   inaDet ina;                                                                 // Hold device details in structure //
   EEPROM.get((deviceNumber%_DeviceCount)*sizeof(ina),ina);                    // Read EEPROM values               //
   int32_t microAmps = readWord(INA_CURRENT_REGISTER,ina.address);             // Get the raw value                //
-          microAmps = (int64_t)microAmps*ina.current_LSB/1000;                // Convert to microamps             //
+
+Serial.print("BusCurrentRaw = ");Serial.println(microAmps);
+          microAmps = (int64_t)microAmps*ina.current_LSB/100000;                // Convert to microamps             //
   return(microAmps);                                                          // return computed microamps        //
 } // of method getBusMicroAmps()                                              //                                  //
 /*******************************************************************************************************************
