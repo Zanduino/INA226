@@ -53,3 +53,4 @@ Debug
 *.atsln
 *.componentinfo.xml
 *.cppproj
+Release
