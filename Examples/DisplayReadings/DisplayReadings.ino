@@ -67,7 +67,7 @@ void setup() {                                                                //
   // The begin initializes the calibration for an expected ±1 Amps maximum current and for a 0.1Ohm resistor, and //
   // since no specific device is given as the 3rd parameter all devices are initially set to these values         //
   devicesFound = INA226.begin(1,100000);                                      // Set expected Amps and resistor   //
-  Serial.print(F("Detected "));                                               //                                  //
+  Serial.print(F(" - Detected "));                                            //                                  //
   Serial.print(devicesFound);                                                 //                                  //
   Serial.println(F(" INA226 devices on I2C bus"));                            //                                  //
   INA226.setAveraging(4);                                                     // Average each reading n-times     //
@@ -80,6 +80,7 @@ void setup() {                                                                //
 ** run in a simple infinite loop                                                                                  **
 *******************************************************************************************************************/
 void loop() {                                                                 // Main program loop                //
+  static uint16_t loopCounter = 0;                                            // Count the number of iterations   //
   for (uint8_t i=0;i<devicesFound;i++) {                                      // Loop through all devices found   //
     Serial.print(F("Bus voltage   "));                                        //                                  //
     Serial.print(i+1);                                                        //                                  //
@@ -97,8 +98,10 @@ void loop() {                                                                 //
     Serial.print(i+1);                                                        //                                  //
     Serial.print(F(":  "));                                                   //                                  //
     Serial.print((float)INA226.getBusMicroWatts(i)/1000.0,4);                 // Convert to milliwatts            //
-    Serial.println(F("mW"));                                                  //                                  //
-    Serial.println();                                                         //                                  //
+    Serial.print(F("mW\n\n"));                                                //                                  //
   } // of for-next each device loop                                           //                                  //
-  delay(1000);                                                                //                                  //
+  delay(5000);                                                                // Wait 5 seconds for next reading  //
+  Serial.print(F("Loop iteration ")  );                                       //                                  //
+  Serial.print(++loopCounter);                                                //                                  //
+  Serial.print(F("\n\n")  );                                                  //                                  //
 } // of method loop                                                           //----------------------------------//
