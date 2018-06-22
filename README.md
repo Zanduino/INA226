@@ -1,7 +1,8 @@
 # INA226 - Has been merged into a new library [INA](https://github.com/SV-Zanshin/INA) 
 ## This library has been deprecated and is obsolete
-Further development and bug fixes will be done in the new [INA](https://github.com/SV-Zanshin/INA)  library.
+Further development and bug fixes will be done in the new [INA](https://github.com/SV-Zanshin/INA)  library.    
 <img src="https://github.com/SV-Zanshin/INA226/blob/master/Images/INA226.jpg" width="175" align="right"/>
+    
 The new [INA](https://github.com/SV-Zanshin/INA) library along with the associated example programs and documentation at https://github.com/SV-Zanshin/INA/wiki supports multiple devices of multiple types in one combined library. The INA226 library functions have been duplicated in the new INA library and several additional functions have been incorporated as well. In addition, several minor bugs were detected and fixed during the transition to the new library.
 
 ## Original page follows:
