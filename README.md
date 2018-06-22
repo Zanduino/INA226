@@ -1,4 +1,4 @@
-# INA226 - Has been merged into a new library [INA](https://github.com/SV-Zanshin/INA) 
+# INA226 - Merged into new library [INA](https://github.com/SV-Zanshin/INA) 
 ## This library has been deprecated and is obsolete
 Further development and bug fixes will be done in the new [INA](https://github.com/SV-Zanshin/INA)  library.    
 <img src="https://github.com/SV-Zanshin/INA226/blob/master/Images/INA226.jpg" width="175" align="right"/>
